@@ -656,3 +656,60 @@ input[type="file"] {
   color: rgba(255, 255, 255, 0.8);
   opacity: 0.9;
 }
+
+/* Add these new styles */
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.custom-textarea {
+  border: 1px solid #dee2e6;
+  resize: none;
+  transition: all 0.3s ease;
+}
+
+.custom-textarea:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+.topic-btn {
+  transition: all 0.3s ease;
+}
+
+.topic-btn:hover {
+  transform: translateY(-2px);
+}
+
+.topic-card {
+  padding: 1.5rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.topic-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.topic-card i {
+  margin-bottom: 1rem;
+}
+
+.topic-card h5 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.topic-card p {
+  color: #666;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
