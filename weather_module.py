@@ -7,6 +7,7 @@ class WeatherAnalyzer:
         self.api_key = api_key
         self.current_url = "https://api.openweathermap.org/data/2.5/weather"
         self.forecast_url = "https://api.openweathermap.org/data/2.5/forecast"
+        self.geocode_url = "https://api.openweathermap.org/geo/1.0/reverse"
 
     def get_weather_data(self, city_name):
         try:

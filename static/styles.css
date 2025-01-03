@@ -75,6 +75,7 @@ body {
   display: block;
 }
 
+/* Update form-container styles - remove hover effects */
 .form-container {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
@@ -86,6 +87,14 @@ body {
   margin: 2rem auto;
   max-width: 800px;
   width: 100%;
+  transition: none; /* Remove transition */
+}
+
+/* Remove form-container hover effect */
+.form-container:hover {
+  background: rgba(255, 255, 255, 0.2); /* Keep same as normal state */
+  transform: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .result-container {
@@ -391,22 +400,11 @@ input[type="file"] {
   transition: all 0.3s;
 }
 
-/* Card hover effects */
+/* Remove any conflicting hover styles */
 .stat-card:hover,
 .form-container:hover {
-  background: linear-gradient(
-      rgba(255, 255, 255, 0.85),
-      rgba(255, 255, 255, 0.85)
-    ),
-    url("/static/images/Leaves-Bg.png") center/cover;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* Remove any individual card background definitions to avoid conflicts */
-.stat-card,
-.form-container {
-  background-blend-mode: overlay;
+  background: none;
+  background-image: none;
 }
 
 /* Ensure text remains readable */
@@ -936,6 +934,9 @@ input[type="file"] {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 15px;
+  background: none;
+  box-shadow: none;
+  transition: none;
 }
 
 .weather-dashboard {
@@ -965,4 +966,38 @@ input[type="file"] {
 .input-section {
   position: relative;
   width: 100%;
+}
+
+/* Add these new styles */
+
+.page-title {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.page-subtitle {
+  color: #2c5914;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  color: var(--primary-color);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: Add hover effect */
+.page-title:hover,
+.section-title:hover {
+  color: var(--secondary-color);
+  transition: color 0.3s ease;
 }
