@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schemes & Loans - Smart Farming</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+      <div class="container">
+        <a class="navbar-brand" href="/">Smart Farming</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/agriculture">Agriculture Advice</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/water">Water Management</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/image">Image Analysis</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/disease">Disease Detection</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/bio-fertilizer">Bio Fertilizer</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/schemes">Schemes & Loans</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-5">
+      <h1 class="text-center mb-4">Agricultural Schemes & Loans</h1>
+      <div class="form-container">
+        <div class="mb-3">
+          <select id="state" class="form-control">
+            <option value="">Select State</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Kerala">Kerala</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <select id="scheme-category" class="form-control">
+            <option value="">Select Category</option>
+            <option value="Crop Loans">Crop Loans</option>
+            <option value="Equipment Purchase">Equipment Purchase</option>
+            <option value="Irrigation Schemes">Irrigation Schemes</option>
+            <option value="All Schemes">All Schemes</option>
+          </select>
+        </div>
+        <button onclick="getSchemeInfo()" class="btn btn-success">
+          Find Schemes
+        </button>
+        <div id="schemes-result" class="result-container mt-4"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/main.js"></script>
+    <!-- Add the footer -->
+    <footer class="footer mt-auto py-3">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h5>Smart Farming AI</h5>
+            <p>Empowering agriculture through artificial intelligence</p>
+          </div>
+          <div class="col-md-4">
+            <h5>Contact Us</h5>
+            <p>
+              <i class="bi bi-envelope"></i> support@smartfarmingai.com<br />
+              <i class="bi bi-telephone"></i> +1 (555) 123-4567<br />
+              <i class="bi bi-geo-alt"></i> Tech Park, Agriculture Valley
+            </p>
+          </div>
+          <div class="col-md-4">
+            <h5>Quick Links</h5>
+            <ul class="list-unstyled">
+              <li><a href="/agriculture">Agriculture Advice</a></li>
+              <li><a href="/water">Water Management</a></li>
+              <li><a href="/schemes">Schemes & Loans</a></li>
+            </ul>
+          </div>
+        </div>
+        <hr />
+        <div class="text-center">
+          <small
+            >&copy; 2024 Smart Farming AI. Commercial use of this chatbot
+            requires authorization.</small
+          >
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
