@@ -59,74 +59,182 @@
       </div>
     </nav>
 
-    <div class="container-fluid py-5">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="text-center mb-5 animate__animated animate__fadeIn">
-            <h1 class="display-4 text-success fw-bold">Agriculture Advice</h1>
-            <p class="lead text-muted">
-              Get expert guidance for sustainable farming practices
-            </p>
-          </div>
-
-          <div
-            class="form-container glass-morphism animate__animated animate__fadeInUp"
-          >
-            <div class="quick-topics mb-4">
-              <h5 class="mb-3">Popular Topics:</h5>
-              <div class="d-flex flex-wrap gap-2">
-                <button
-                  class="btn btn-outline-success btn-sm topic-btn"
-                  onclick="insertTopic('organic farming')"
-                >
-                  Organic Farming
-                </button>
-                <button
-                  class="btn btn-outline-success btn-sm topic-btn"
-                  onclick="insertTopic('crop rotation')"
-                >
-                  Crop Rotation
-                </button>
-                <button
-                  class="btn btn-outline-success btn-sm topic-btn"
-                  onclick="insertTopic('pest management')"
-                >
-                  Pest Management
-                </button>
-                <button
-                  class="btn btn-outline-success btn-sm topic-btn"
-                  onclick="insertTopic('soil health')"
-                >
-                  Soil Health
-                </button>
-              </div>
-            </div>
-
+    <div class="container-fluid py-4">
+      <div class="row">
+        <!-- Left Sidebar - Weather Dashboard -->
+        <div class="col-lg-3">
+          <div class="weather-dashboard sticky-top" style="top: 20px">
+            <h5 class="mb-3"><i class="bi bi-cloud-sun"></i> Local Weather</h5>
             <div class="input-group mb-3">
-              <span class="input-group-text bg-light">
-                <i class="bi bi-chat-dots"></i>
-              </span>
-              <textarea
-                id="agri-question"
-                class="form-control custom-textarea"
-                placeholder="Ask your agriculture related question..."
-                rows="4"
-              ></textarea>
-            </div>
-
-            <div class="text-center">
+              <input
+                type="text"
+                id="weather-city"
+                class="form-control"
+                placeholder="Enter city name"
+              />
               <button
-                onclick="getAgricultureAdvice()"
-                class="btn btn-success btn-lg px-4"
+                class="btn btn-outline-success"
+                onclick="getWeatherData()"
               >
-                <i class="bi bi-search me-2"></i>Get Expert Advice
+                <i class="bi bi-cloud"></i>
               </button>
             </div>
 
-            <div id="advice-result" class="result-container mt-4">
-              <!-- Results will be displayed here -->
+            <div id="weather-data" class="weather-cards" style="display: none">
+              <div class="weather-card mb-3">
+                <h6><i class="bi bi-thermometer-half"></i> Temperature</h6>
+                <div id="temperature-data"></div>
+              </div>
+              <div class="weather-card mb-3">
+                <h6><i class="bi bi-droplet"></i> Humidity</h6>
+                <div id="humidity-data"></div>
+              </div>
+              <div class="weather-card mb-3">
+                <h6><i class="bi bi-cloud"></i> Conditions</h6>
+                <div id="conditions-data"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+          <div class="main-content-area">
+            <div class="text-center mb-4 animate__animated animate__fadeIn">
+              <h1 class="display-4 text-success fw-bold">Agriculture Advice</h1>
+              <p class="lead text-muted">
+                Get expert guidance for sustainable farming practices
+              </p>
             </div>
 
+            <div
+              class="form-container glass-morphism animate__animated animate__fadeInUp"
+            >
+              <!-- Search History Toggle -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <button
+                  class="btn btn-outline-success btn-sm"
+                  onclick="toggleSearchHistory()"
+                >
+                  <i class="bi bi-clock-history"></i> View Search History
+                </button>
+                <select
+                  id="language"
+                  class="form-select form-select-sm"
+                  style="width: auto"
+                >
+                  <option value="en">English</option>
+                  <option value="hi">हिंदी</option>
+                  <option value="te">తెలుగు</option>
+                  <option value="ta">தமிழ்</option>
+                </select>
+              </div>
+
+              <!-- Search History Panel -->
+              <div
+                id="searchHistory"
+                class="history-panel mb-4"
+                style="display: none"
+              >
+                <div class="card glass-morphism">
+                  <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Recent Searches</h5>
+                  </div>
+                  <div class="card-body" id="historyList">
+                    <!-- History items will be added here dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Topics Section -->
+              <div class="quick-topics mb-4">
+                <h5 class="mb-3">Popular Topics:</h5>
+                <div class="d-flex flex-wrap gap-2">
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="insertTopic('organic farming')"
+                  >
+                    <i class="bi bi-flower1"></i> Organic Farming
+                  </button>
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="insertTopic('crop rotation')"
+                  >
+                    <i class="bi bi-arrow-repeat"></i> Crop Rotation
+                  </button>
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="insertTopic('pest management')"
+                  >
+                    <i class="bi bi-bug"></i> Pest Management
+                  </button>
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="insertTopic('soil health')"
+                  >
+                    <i class="bi bi-layers"></i> Soil Health
+                  </button>
+                </div>
+              </div>
+
+              <!-- Input Area -->
+              <div class="input-section mb-4">
+                <div class="d-flex gap-2">
+                  <button
+                    id="voiceInputBtn"
+                    class="btn btn-outline-success"
+                    onclick="startVoiceInput()"
+                  >
+                    <i class="bi bi-mic"></i>
+                  </button>
+                  <div class="flex-grow-1">
+                    <textarea
+                      id="agri-question"
+                      class="form-control custom-textarea"
+                      placeholder="Ask your agriculture related question..."
+                      rows="4"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="text-center mb-4">
+                <button
+                  onclick="getAgricultureAdvice()"
+                  class="btn btn-success btn-lg px-4"
+                >
+                  <i class="bi bi-search me-2"></i>Get Expert Advice
+                </button>
+                <button
+                  onclick="clearForm()"
+                  class="btn btn-outline-secondary btn-lg px-4 ms-2"
+                >
+                  <i class="bi bi-x-circle me-2"></i>Clear
+                </button>
+              </div>
+
+              <!-- Loading Indicator -->
+              <div
+                id="loadingIndicator"
+                class="text-center mt-4"
+                style="display: none"
+              >
+                <div class="spinner-border text-success" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Analyzing your question...</p>
+              </div>
+
+              <!-- Results Area -->
+              <div id="advice-result" class="result-container mt-4">
+                <!-- Results will be displayed here -->
+              </div>
+            </div>
+
+            <!-- Featured Topics Grid -->
             <div class="featured-topics mt-5">
               <h4 class="text-success mb-4">Explore Topics</h4>
               <div class="row g-4">
@@ -200,6 +308,110 @@
         const textarea = document.getElementById("agri-question");
         textarea.value = `Tell me about ${topic} and its best practices.`;
         textarea.focus();
+      }
+
+      // Search History Management
+      function toggleSearchHistory() {
+        const historyPanel = document.getElementById("searchHistory");
+        historyPanel.style.display =
+          historyPanel.style.display === "none" ? "block" : "none";
+      }
+
+      function addToHistory(question) {
+        const history = JSON.parse(
+          localStorage.getItem("searchHistory") || "[]"
+        );
+        history.unshift({ question, timestamp: new Date().toISOString() });
+        if (history.length > 5) history.pop(); // Keep only last 5 searches
+        localStorage.setItem("searchHistory", JSON.stringify(history));
+        updateHistoryDisplay();
+      }
+
+      function updateHistoryDisplay() {
+        const history = JSON.parse(
+          localStorage.getItem("searchHistory") || "[]"
+        );
+        const historyList = document.getElementById("historyList");
+        historyList.innerHTML = history
+          .map(
+            (item) => `
+          <div class="history-item" onclick="loadHistoryItem('${
+            item.question
+          }')">
+            <small class="text-muted">${new Date(
+              item.timestamp
+            ).toLocaleString()}</small>
+            <p class="mb-0">${item.question}</p>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function loadHistoryItem(question) {
+        document.getElementById("agri-question").value = question;
+      }
+
+      // Voice Input
+      function startVoiceInput() {
+        if ("webkitSpeechRecognition" in window) {
+          const recognition = new webkitSpeechRecognition();
+          recognition.lang = document.getElementById("language").value;
+          recognition.onresult = function (event) {
+            document.getElementById("agri-question").value =
+              event.results[0][0].transcript;
+          };
+          recognition.start();
+        } else {
+          alert("Voice input is not supported in your browser");
+        }
+      }
+
+      // Clear Form
+      function clearForm() {
+        document.getElementById("agri-question").value = "";
+        document.getElementById("advice-result").innerHTML = "";
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        updateHistoryDisplay();
+      });
+
+      // Update existing getAgricultureAdvice function
+      async function getAgricultureAdvice() {
+        const question = document.getElementById("agri-question").value;
+        if (!question) {
+          showError("Please enter your question");
+          return;
+        }
+
+        // Show loading indicator
+        document.getElementById("loadingIndicator").style.display = "block";
+
+        try {
+          const response = await fetch("/get-advice", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `question=${encodeURIComponent(question)}`,
+          });
+
+          const data = await response.json();
+          if (data.error) throw new Error(data.error);
+
+          // Add to history
+          addToHistory(question);
+
+          // Display results with animation
+          await displayFormattedResponse("advice-result", data.advice);
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          // Hide loading indicator
+          document.getElementById("loadingIndicator").style.display = "none";
+        }
       }
     </script>
   </body>

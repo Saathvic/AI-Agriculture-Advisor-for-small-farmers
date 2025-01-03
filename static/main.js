@@ -331,3 +331,73 @@ async function getSchemeInfo() {
     resultDiv.innerHTML = `<div class="error">${error.message}</div>`;
   }
 }
+
+// Add these new functions
+
+async function getWeatherData() {
+  const city = document.getElementById("weather-city").value;
+  if (!city) {
+    showError("Please enter a city name");
+    return;
+  }
+
+  try {
+    const response = await fetch("/weather", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `city=${encodeURIComponent(city)}`,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    displayWeatherData(data);
+    document.getElementById("weather-data").style.display = "flex";
+  } catch (error) {
+    showError(error.message);
+  }
+}
+
+function displayWeatherData(data) {
+  // Temperature Card
+  document.getElementById("temperature-data").innerHTML = `
+        <div class="weather-value">${data.temperature_data.current}°C</div>
+        <div class="weather-trend">
+            <i class="bi bi-arrow-${
+              data.temperature_data.trend === "rising" ? "up" : "down"
+            } ${
+    data.temperature_data.trend === "rising" ? "trend-up" : "trend-down"
+  }"></i>
+            Trend: ${data.temperature_data.trend}
+        </div>
+        <small>Range: ${data.temperature_data.min}°C - ${
+    data.temperature_data.max
+  }°C</small>
+    `;
+
+  // Humidity Card
+  document.getElementById("humidity-data").innerHTML = `
+        <div class="weather-value">${data.humidity_data.current}%</div>
+        <div class="weather-trend">
+            <i class="bi bi-arrow-${
+              data.humidity_data.trend === "rising" ? "up" : "down"
+            } ${
+    data.humidity_data.trend === "rising" ? "trend-up" : "trend-down"
+  }"></i>
+            Trend: ${data.humidity_data.trend}
+        </div>
+        <small>High humidity: ${data.humidity_data.high_humidity_hours}h</small>
+    `;
+
+  // Conditions Card
+  document.getElementById("conditions-data").innerHTML = `
+        <div class="weather-value">${data.weather_conditions.current}</div>
+        <div class="weather-trend">
+            <i class="bi bi-cloud-rain"></i>
+            Rain chance: ${data.weather_conditions.precipitation_probability}%
+        </div>
+        <small>Wind: ${data.water_management.wind_speed} m/s</small>
+    `;
+}
