@@ -1,50 +1,32 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // Highlight active nav link
-  const currentPath = window.location.pathname;
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    if (link.getAttribute("href") === currentPath) {
-      link.classList.add("active");
+// Typewriter effect function with configurable speed and cursor
+async function typewriterEffect(element, text, speed = 30) {
+  let i = 0;
+  element.innerHTML = "";
+  element.classList.add("typing");
+
+  return new Promise((resolve) => {
+    function type() {
+      if (i < text.length) {
+        element.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        element.classList.remove("typing");
+        resolve();
+      }
     }
+    type();
   });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Navigation handling
-  const navButtons = document.querySelectorAll(".nav-btn");
-  navButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const section = button.dataset.section;
-      showSection(section);
-    });
-  });
-});
-
-function showSection(sectionId) {
-  // Hide all sections
-  document.querySelectorAll(".section").forEach((section) => {
-    section.classList.remove("active");
-  });
-
-  // Show selected section
-  document.getElementById(sectionId).classList.add("active");
-
-  // Update active nav button
-  document.querySelectorAll(".nav-btn").forEach((btn) => {
-    btn.classList.remove("active");
-  });
-  document
-    .querySelector(`[data-section="${sectionId}"]`)
-    .classList.add("active");
 }
 
-// Common formatting function for all AI responses
+// Enhanced response formatter with HTML parsing
 function formatAIResponse(content) {
-  const formattedContent = content
+  return content
     .split("\n")
     .map((line) => {
       if (line.trim() === "") return "<br>";
       if (line.startsWith("# ")) {
-        return `<h3 class="mt-4">${line.substring(2)}</h3>`;
+        return `<h3 class="mt-4 mb-3">${line.substring(2)}</h3>`;
       }
       if (/^\d+\.\s\*\*.*\*\*/.test(line)) {
         return line.replace(
@@ -64,116 +46,72 @@ function formatAIResponse(content) {
       )}</p>`;
     })
     .join("");
-
-  return formattedContent;
 }
 
-// Add typewriter effect function
-async function typewriterEffect(element, html, speed = 30) {
-  element.innerHTML = "";
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = html;
-  const textNodes = [];
-
-  function extractTextNodes(node) {
-    if (node.nodeType === 3) {
-      // Text node
-      textNodes.push({ text: node.textContent, parent: node.parentNode });
-    } else {
-      node.childNodes.forEach((child) => extractTextNodes(child));
-    }
-  }
-
-  extractTextNodes(tempDiv);
-  element.innerHTML = html;
-  const contentElements = element.querySelectorAll("p, h3, br");
-
-  for (let elem of contentElements) {
-    elem.style.opacity = "0";
-  }
-
-  for (let elem of contentElements) {
-    elem.style.opacity = "1";
-    await new Promise((resolve) => setTimeout(resolve, speed * 10));
-  }
-}
-
-// Update the result display functions
+// Unified display function for all features
 async function displayFormattedResponse(containerId, content) {
-  showLoading();
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-  const adviceContent = document.querySelector(".advice-content");
-  const sections = formatAIResponse(content).split("<h3");
+  const adviceContent = container.querySelector(".advice-content") || container;
+  const loadingOverlay = document.querySelector(".loading-overlay");
 
+  // Parse and prepare content
+  const formattedContent = formatAIResponse(content);
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = formattedContent;
+
+  // Clear existing content
   adviceContent.innerHTML = "";
 
-  // Process each section
-  for (let i = 0; i < sections.length; i++) {
-    if (i === 0) continue; // Skip first empty split
-    const section = document.createElement("div");
-    section.className = "advice-section";
-    section.style.setProperty("--animation-order", i);
-    section.innerHTML = "<h3" + sections[i];
-    adviceContent.appendChild(section);
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  // Hide loading overlay as we begin typing
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "none";
   }
 
-  hideLoading();
-}
-
-// Add this function near the top with other utility functions
-function showError(message) {
-  const errorDiv = document.createElement("div");
-  errorDiv.className = "error alert alert-danger";
-  errorDiv.textContent = message;
-
-  // Find the relevant result container
-  const containers = [
-    "advice-result",
-    "water-advice-result",
-    "image-analysis-result",
-    "disease-result",
-    "bio-fertilizer-result",
-    "schemes-result",
-  ];
-
-  for (const id of containers) {
-    const container = document.getElementById(id);
-    if (container) {
-      container.innerHTML = "";
-      container.appendChild(errorDiv);
-      break;
-    }
+  // Show advice container
+  const adviceContainer = document.querySelector(".advice");
+  if (adviceContainer) {
+    adviceContainer.style.display = "block";
   }
 
-  // Auto-remove the error after 5 seconds
-  setTimeout(() => errorDiv.remove(), 5000);
+  // Type each element
+  for (let child of tempDiv.children) {
+    const element = document.createElement(child.tagName);
+    element.className = child.className;
+    adviceContent.appendChild(element);
+    await typewriterEffect(element, child.textContent, 10);
+  }
 }
 
-// Update existing API call handlers
-function getAgricultureAdvice() {
+// Enhanced feature handlers
+async function getAgricultureAdvice() {
   const question = document.getElementById("agri-question").value;
   if (!question) {
     showError("Please enter your question");
     return;
   }
 
-  fetch("/get-advice", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `question=${encodeURIComponent(question)}`,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) throw new Error(data.error);
-      displayFormattedResponse("advice-result", data.advice);
-    })
-    .catch((error) => showError(error.message));
+  showLoading();
+
+  try {
+    const response = await fetch("/get-advice", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `question=${encodeURIComponent(question)}`,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    await displayFormattedResponse("advice-result", data.advice);
+  } catch (error) {
+    showError(error.message);
+    hideLoading();
+  }
 }
 
-function getWaterAdvice() {
+async function getWaterAdvice() {
   const cropType = document.getElementById("crop-type").value;
   const soilType = document.getElementById("soil-type").value;
 
@@ -182,44 +120,54 @@ function getWaterAdvice() {
     return;
   }
 
-  fetch("/water-management", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `crop_type=${encodeURIComponent(
-      cropType
-    )}&soil_type=${encodeURIComponent(soilType)}`,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) throw new Error(data.error);
-      displayFormattedResponse("water-advice-result", data.advice);
-    })
-    .catch((error) => showError(error.message));
+  showLoading();
+
+  try {
+    const response = await fetch("/water-management", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `crop_type=${encodeURIComponent(
+        cropType
+      )}&soil_type=${encodeURIComponent(soilType)}`,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    await displayFormattedResponse("water-advice-result", data.advice);
+  } catch (error) {
+    showError(error.message);
+    hideLoading();
+  }
 }
 
-function analyzeImage() {
+async function analyzeImage() {
   const fileInput = document.getElementById("crop-image");
   if (!fileInput.files[0]) {
     showError("Please select an image");
     return;
   }
 
+  showLoading();
+
   const formData = new FormData();
   formData.append("image", fileInput.files[0]);
 
-  fetch("/analyze-image", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) throw new Error(data.error);
-      const content = `# Crop Identified\n${data.crop_identified}\n\n${data.sustainable_advice}`;
-      displayFormattedResponse("image-analysis-result", content);
-    })
-    .catch((error) => showError(error.message));
+  try {
+    const response = await fetch("/analyze-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    const content = `# Crop Identified\n${data.crop_identified}\n\n${data.sustainable_advice}`;
+    await displayFormattedResponse("image-analysis-result", content);
+  } catch (error) {
+    showError(error.message);
+    hideLoading();
+  }
 }
 
 async function analyzeDiseaseImage() {
@@ -229,8 +177,7 @@ async function analyzeDiseaseImage() {
     return;
   }
 
-  // Show loading indicator
-  document.getElementById("loadingIndicator").style.display = "block";
+  showLoading();
 
   const formData = new FormData();
   formData.append("image", fileInput.files[0]);
@@ -244,21 +191,15 @@ async function analyzeDiseaseImage() {
     const data = await response.json();
     if (data.error) throw new Error(data.error);
 
-    // Format the content similar to image analysis
     const content = `# Disease Analysis Results\n${data.diagnosis}`;
     await displayFormattedResponse("disease-result", content);
-
-    // Show the advice container
-    document.querySelector(".advice").style.display = "block";
   } catch (error) {
     showError(error.message);
-  } finally {
-    // Hide loading indicator
-    document.getElementById("loadingIndicator").style.display = "none";
+    hideLoading();
   }
 }
 
-function getBioFertilizerAdvice() {
+async function getBioFertilizerAdvice() {
   const cropType = document.getElementById("bio-crop-type").value;
   const soilType = document.getElementById("bio-soil-type").value;
   const growthStage = document.getElementById("growth-stage").value;
@@ -268,37 +209,29 @@ function getBioFertilizerAdvice() {
     return;
   }
 
-  // Show loading state
-  const loadingOverlay = document.querySelector(".loading-overlay");
-  const adviceContainer = document.querySelector(".advice");
-  loadingOverlay.style.display = "flex";
-  adviceContainer.style.display = "none";
+  showLoading();
 
-  fetch("/bio-fertilizer", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `crop_type=${encodeURIComponent(
-      cropType
-    )}&soil_type=${encodeURIComponent(
-      soilType
-    )}&growth_stage=${encodeURIComponent(growthStage)}`,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) throw new Error(data.error);
-      displayFormattedResponse("bio-fertilizer-result", data.advice);
-      // Show the advice container
-      document.querySelector(".advice").style.display = "block";
-    })
-    .catch((error) => {
-      showError(error.message);
-      loadingOverlay.style.display = "none";
+  try {
+    const response = await fetch("/bio-fertilizer", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `crop_type=${encodeURIComponent(
+        cropType
+      )}&soil_type=${encodeURIComponent(
+        soilType
+      )}&growth_stage=${encodeURIComponent(growthStage)}`,
     });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    await displayFormattedResponse("bio-fertilizer-result", data.advice);
+  } catch (error) {
+    showError(error.message);
+    hideLoading();
+  }
 }
 
-// Schemes Information Function
 async function getSchemeInfo() {
   const state = document.getElementById("state").value;
   const category = document.getElementById("scheme-category").value;
@@ -308,20 +241,12 @@ async function getSchemeInfo() {
     return;
   }
 
-  // Show loading state
-  const loadingOverlay = document.querySelector(".loading-overlay");
-  const adviceContainer = document.querySelector(".advice");
-  if (loadingOverlay && adviceContainer) {
-    loadingOverlay.style.display = "flex";
-    adviceContainer.style.display = "none";
-  }
+  showLoading();
 
   try {
     const response = await fetch("/schemes", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `state=${encodeURIComponent(state)}&category=${encodeURIComponent(
         category
       )}`,
@@ -331,158 +256,58 @@ async function getSchemeInfo() {
     if (data.error) throw new Error(data.error);
 
     await displayFormattedResponse("schemes-result", data.schemes);
-    // Show the advice container
-    const adviceDiv = document.querySelector(".advice");
-    if (adviceDiv) {
-      adviceDiv.style.display = "block";
-    }
   } catch (error) {
     showError(error.message);
-  } finally {
-    // Hide loading overlay
-    if (loadingOverlay) {
-      loadingOverlay.style.display = "none";
-    }
+    hideLoading();
   }
 }
 
-// Add these new functions
-
+// Utility functions
 function showLoading() {
   const loadingOverlay = document.querySelector(".loading-overlay");
   const adviceContainer = document.querySelector(".advice");
-  loadingOverlay.style.display = "flex";
-  adviceContainer.style.display = "none";
+  if (loadingOverlay && adviceContainer) {
+    loadingOverlay.style.display = "flex";
+    adviceContainer.style.display = "none";
+  }
 }
 
 function hideLoading() {
   const loadingOverlay = document.querySelector(".loading-overlay");
-  const adviceContainer = document.querySelector(".advice");
-  loadingOverlay.style.display = "none";
-  adviceContainer.style.display = "block";
-}
-
-function copyResponse() {
-  const content = document.querySelector(".advice-content").innerText;
-  navigator.clipboard
-    .writeText(content)
-    .then(() => {
-      showToast("Advice copied to clipboard!");
-    })
-    .catch((err) => {
-      showToast("Failed to copy text");
-    });
-}
-
-function shareResponse() {
-  if (navigator.share) {
-    navigator
-      .share({
-        title: "Agriculture Advice",
-        text: document.querySelector(".advice-content").innerText,
-        url: window.location.href,
-      })
-      .catch(console.error);
-  } else {
-    showToast("Sharing not supported on this browser");
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "none";
   }
 }
 
-function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "toast-message";
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
-// Add styles for toast messages
+// Add necessary styles
 const style = document.createElement("style");
 style.textContent = `
-  .toast-message {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(44, 89, 20, 0.9);
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 25px;
-      z-index: 1000;
-      animation: fadeInOut 3s ease-in-out;
+  .typing::after {
+    content: '|';
+    animation: blink 1s infinite;
   }
-  
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .toast-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(44, 89, 20, 0.9);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    z-index: 1000;
+    animation: fadeInOut 3s ease-in-out;
+  }
+
   @keyframes fadeInOut {
-      0%, 100% { opacity: 0; }
-      10%, 90% { opacity: 1; }
+    0%, 100% { opacity: 0; }
+    10%, 90% { opacity: 1; }
   }
 `;
 document.head.appendChild(style);
-
-async function getWeatherData() {
-  const city = document.getElementById("weather-city").value;
-  if (!city) {
-    showError("Please enter a city name");
-    return;
-  }
-
-  try {
-    const response = await fetch("/weather", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `city=${encodeURIComponent(city)}`,
-    });
-
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
-
-    displayWeatherData(data);
-    document.getElementById("weather-data").style.display = "flex";
-  } catch (error) {
-    showError(error.message);
-  }
-}
-
-function displayWeatherData(data) {
-  // Temperature Card
-  document.getElementById("temperature-data").innerHTML = `
-        <div class="weather-value">${data.temperature_data.current}°C</div>
-        <div class="weather-trend">
-            <i class="bi bi-arrow-${
-              data.temperature_data.trend === "rising" ? "up" : "down"
-            } ${
-    data.temperature_data.trend === "rising" ? "trend-up" : "trend-down"
-  }"></i>
-            Trend: ${data.temperature_data.trend}
-        </div>
-        <small>Range: ${data.temperature_data.min}°C - ${
-    data.temperature_data.max
-  }°C</small>
-    `;
-
-  // Humidity Card
-  document.getElementById("humidity-data").innerHTML = `
-        <div class="weather-value">${data.humidity_data.current}%</div>
-        <div class="weather-trend">
-            <i class="bi bi-arrow-${
-              data.humidity_data.trend === "rising" ? "up" : "down"
-            } ${
-    data.humidity_data.trend === "rising" ? "trend-up" : "trend-down"
-  }"></i>
-            Trend: ${data.humidity_data.trend}
-        </div>
-        <small>High humidity: ${data.humidity_data.high_humidity_hours}h</small>
-    `;
-
-  // Conditions Card
-  document.getElementById("conditions-data").innerHTML = `
-        <div class="weather-value">${data.weather_conditions.current}</div>
-        <div class="weather-trend">
-            <i class="bi bi-cloud-rain"></i>
-            Rain chance: ${data.weather_conditions.precipitation_probability}%
-        </div>
-        <small>Wind: ${data.water_management.wind_speed} m/s</small>
-    `;
-}
