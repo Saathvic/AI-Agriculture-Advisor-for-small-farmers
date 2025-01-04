@@ -63,7 +63,46 @@
         <!-- Left Sidebar - Weather Dashboard -->
         <div class="col-lg-3">
           <div class="weather-dashboard sticky-top mb-4">
-            <!-- ...existing weather dashboard code... -->
+            <div class="weather-header">
+              <h5 class="mb-3 d-flex align-items-center">
+                <i class="bi bi-cloud-sun me-2"></i>Local Weather
+              </h5>
+              <div class="search-box mb-3">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="weather-city"
+                    class="form-control form-control-sm"
+                    placeholder="Enter city name"
+                  />
+                  <button
+                    class="btn btn-outline-success btn-sm"
+                    onclick="getWeatherData()"
+                  >
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="weather-data" class="weather-cards" style="display: none">
+              <div class="weather-grid">
+                <div class="weather-card">
+                  <h6>
+                    <i class="bi bi-thermometer-half me-2"></i>Temperature
+                  </h6>
+                  <div id="temperature-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-droplet me-2"></i>Humidity</h6>
+                  <div id="humidity-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-cloud me-2"></i>Conditions</h6>
+                  <div id="conditions-data" class="weather-content"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
