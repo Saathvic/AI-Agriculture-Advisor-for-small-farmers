@@ -9,6 +9,14 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/styles.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
@@ -50,30 +58,180 @@
       </div>
     </nav>
 
-    <div class="container py-5">
-      <h1 class="text-center mb-4">Water Management</h1>
-      <div class="form-container">
-        <div class="mb-3">
-          <input
-            type="text"
-            id="crop-type"
-            class="form-control"
-            placeholder="Crop Type"
-          />
+    <div class="container-fluid py-4">
+      <div class="row">
+        <!-- Left Sidebar - Weather Dashboard -->
+        <div class="col-lg-3">
+          <div class="weather-dashboard sticky-top mb-4">
+            <div class="weather-header">
+              <h5 class="mb-3 d-flex align-items-center">
+                <i class="bi bi-cloud-sun me-2"></i>Local Weather
+              </h5>
+              <div class="search-box mb-3">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="weather-city"
+                    class="form-control form-control-sm"
+                    placeholder="Enter city name"
+                  />
+                  <button
+                    class="btn btn-outline-success btn-sm"
+                    onclick="getWeatherData()"
+                  >
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="weather-data" class="weather-cards" style="display: none">
+              <div class="weather-grid">
+                <div class="weather-card">
+                  <h6>
+                    <i class="bi bi-thermometer-half me-2"></i>Temperature
+                  </h6>
+                  <div id="temperature-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-droplet me-2"></i>Humidity</h6>
+                  <div id="humidity-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-cloud me-2"></i>Conditions</h6>
+                  <div id="conditions-data" class="weather-content"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <select id="soil-type" class="form-control">
-            <option value="">Select Soil Type</option>
-            <option value="Sandy">Sandy</option>
-            <option value="Clay">Clay</option>
-            <option value="Loamy">Loamy</option>
-            <option value="Silt">Silt</option>
-          </select>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+          <div class="row justify-content-center">
+            <div class="col-lg-8">
+              <div class="text-center mb-4 animate__animated animate__fadeIn">
+                <h1 class="page-title">Water Management</h1>
+                <p class="page-subtitle">
+                  Get expert irrigation and water conservation advice
+                </p>
+              </div>
+
+              <div
+                class="form-container glass-morphism animate__animated animate__fadeInUp"
+              >
+                <div class="mb-4">
+                  <h5 class="mb-3">Crop Information</h5>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text"
+                      ><i class="bi bi-tree"></i
+                    ></span>
+                    <input
+                      type="text"
+                      id="crop-type"
+                      class="form-control"
+                      placeholder="Enter Crop Type"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-layers"></i
+                    ></span>
+                    <select id="soil-type" class="form-control">
+                      <option value="">Select Soil Type</option>
+                      <option value="Sandy">Sandy</option>
+                      <option value="Clay">Clay</option>
+                      <option value="Loamy">Loamy</option>
+                      <option value="Silt">Silt</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="text-center mb-4">
+                  <button
+                    onclick="getWaterAdvice()"
+                    class="btn btn-success btn-lg px-4"
+                  >
+                    <i class="bi bi-droplet me-2"></i>Get Water Advice
+                  </button>
+                </div>
+
+                <div
+                  id="loadingIndicator"
+                  class="text-center mt-4"
+                  style="display: none"
+                >
+                  <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-2">Analyzing water requirements...</p>
+                </div>
+
+                <div id="water-advice-result" class="result-container mt-4">
+                  <div class="loading-overlay" style="display: none">
+                    <div class="spinner-border text-success mb-3" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-success">Analyzing water management...</p>
+                  </div>
+
+                  <div class="advice" style="display: none">
+                    <div class="response-header">
+                      <h3 class="response-title">Water Management Plan</h3>
+                      <div class="response-actions">
+                        <button
+                          class="action-btn"
+                          onclick="copyResponse()"
+                          title="Copy"
+                        >
+                          <i class="bi bi-clipboard"></i>
+                        </button>
+                        <button
+                          class="action-btn"
+                          onclick="shareResponse()"
+                          title="Share"
+                        >
+                          <i class="bi bi-share"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="advice-content">
+                      <!-- Content will be inserted here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Water Conservation Tips -->
+              <div class="featured-topics mt-5">
+                <h4 class="section-title">Water Conservation Tips</h4>
+                <div class="row g-4">
+                  <div class="col-md-4">
+                    <div class="topic-card">
+                      <i class="bi bi-moisture fs-1 text-success"></i>
+                      <h5>Efficient Irrigation</h5>
+                      <p>Smart watering techniques for optimal results</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="topic-card">
+                      <i class="bi bi-calendar-check fs-1 text-success"></i>
+                      <h5>Scheduling</h5>
+                      <p>Best times for watering your crops</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="topic-card">
+                      <i class="bi bi-droplet-half fs-1 text-success"></i>
+                      <h5>Conservation</h5>
+                      <p>Water-saving methods and practices</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <button onclick="getWaterAdvice()" class="btn btn-success">
-          Get Water Advice
-        </button>
-        <div id="water-advice-result" class="result-container mt-4"></div>
       </div>
     </div>
 
