@@ -114,6 +114,35 @@ def analyze_disease_with_vision(image):
             "Content-Type": "application/json"
         }
 
+        prompt = """Analyze this plant image and provide a detailed disease assessment following this exact format:
+
+# Disease Identification
+[Identify the disease name and affected plant]
+
+# Symptoms Analysis
+1. **Visual Symptoms**
+[List and describe visible symptoms]
+
+2. **Severity Assessment**
+[Evaluate the stage and severity of infection]
+
+# Treatment Recommendations
+1. **Immediate Actions**
+[List urgent steps to take]
+
+2. **Long-term Management**
+[Provide sustainable treatment options]
+
+# Prevention Measures
+1. **Cultural Practices**
+[List preventive farming practices]
+
+2. **Environmental Controls**
+[Describe optimal growing conditions]
+
+# Additional Notes
+[Any other relevant information or specific concerns]"""
+
         payload = {
             "model": "llama-3.2-90b-vision-preview",
             "messages": [
@@ -122,7 +151,7 @@ def analyze_disease_with_vision(image):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Analyze this plant image and provide a detailed disease assessment following this format:"
+                            "text": prompt
                         },
                         {
                             "type": "image_url",
@@ -142,8 +171,9 @@ def analyze_disease_with_vision(image):
             headers=headers,
             json=payload
         )
+        
         if response.status_code != 200:
-            print(f"API Response: {response.text}")  # Debug logging
+            print(f"API Response: {response.text}")
             raise Exception(f"API request failed with status {response.status_code}")
             
         return response.json()['choices'][0]['message']['content']

@@ -222,26 +222,40 @@ function analyzeImage() {
     .catch((error) => showError(error.message));
 }
 
-function analyzeDiseaseImage() {
+async function analyzeDiseaseImage() {
   const fileInput = document.getElementById("disease-image");
   if (!fileInput.files[0]) {
     showError("Please select an image");
     return;
   }
 
+  // Show loading indicator
+  document.getElementById("loadingIndicator").style.display = "block";
+
   const formData = new FormData();
   formData.append("image", fileInput.files[0]);
 
-  fetch("/analyze-disease", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) throw new Error(data.error);
-      displayFormattedResponse("disease-result", data.diagnosis);
-    })
-    .catch((error) => showError(error.message));
+  try {
+    const response = await fetch("/analyze-disease", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    // Format the content similar to image analysis
+    const content = `# Disease Analysis Results\n${data.diagnosis}`;
+    await displayFormattedResponse("disease-result", content);
+
+    // Show the advice container
+    document.querySelector(".advice").style.display = "block";
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    // Hide loading indicator
+    document.getElementById("loadingIndicator").style.display = "none";
+  }
 }
 
 function getBioFertilizerAdvice() {

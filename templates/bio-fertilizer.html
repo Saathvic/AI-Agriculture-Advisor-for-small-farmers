@@ -50,40 +50,160 @@
       </div>
     </nav>
 
-    <div class="container py-5">
-      <h1 class="text-center mb-4">Bio Fertilizer Advisory</h1>
-      <div class="form-container">
-        <div class="mb-3">
-          <input
-            type="text"
-            id="bio-crop-type"
-            class="form-control"
-            placeholder="Crop Type"
-          />
+    <div class="container-fluid py-4">
+      <div class="row">
+        <!-- Left Sidebar - Weather Dashboard -->
+        <div class="col-lg-3">
+          <div class="weather-dashboard sticky-top mb-4">
+            <div class="weather-header">
+              <h5 class="mb-3 d-flex align-items-center">
+                <i class="bi bi-cloud-sun me-2"></i>Local Weather
+              </h5>
+              <div class="search-box mb-3">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="weather-city"
+                    class="form-control form-control-sm"
+                    placeholder="Enter city name"
+                  />
+                  <button
+                    class="btn btn-outline-success btn-sm"
+                    onclick="getWeatherData()"
+                  >
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="weather-data" class="weather-cards" style="display: none">
+              <div class="weather-grid">
+                <div class="weather-card">
+                  <h6>
+                    <i class="bi bi-thermometer-half me-2"></i>Temperature
+                  </h6>
+                  <div id="temperature-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-droplet me-2"></i>Humidity</h6>
+                  <div id="humidity-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-cloud me-2"></i>Conditions</h6>
+                  <div id="conditions-data" class="weather-content"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <select id="bio-soil-type" class="form-control">
-            <option value="">Select Soil Type</option>
-            <option value="Sandy">Sandy</option>
-            <option value="Clay">Clay</option>
-            <option value="Loamy">Loamy</option>
-            <option value="Silt">Silt</option>
-          </select>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+          <div class="main-content-area">
+            <div class="text-center mb-4 animate__animated animate__fadeIn">
+              <h1 class="page-title">Bio Fertilizer Advisory</h1>
+              <p class="page-subtitle">
+                Get expert recommendations for organic farming solutions
+              </p>
+            </div>
+
+            <div
+              class="form-container glass-morphism animate__animated animate__fadeInUp"
+            >
+              <div class="input-section mb-4">
+                <div class="input-group mb-3">
+                  <span class="input-group-text"
+                    ><i class="bi bi-tree"></i
+                  ></span>
+                  <input
+                    type="text"
+                    id="bio-crop-type"
+                    class="form-control"
+                    placeholder="Crop Type"
+                  />
+                </div>
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text"
+                    ><i class="bi bi-layers"></i
+                  ></span>
+                  <select id="bio-soil-type" class="form-control">
+                    <option value="">Select Soil Type</option>
+                    <option value="Sandy">Sandy</option>
+                    <option value="Clay">Clay</option>
+                    <option value="Loamy">Loamy</option>
+                    <option value="Silt">Silt</option>
+                  </select>
+                </div>
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text"
+                    ><i class="bi bi-clock"></i
+                  ></span>
+                  <select id="growth-stage" class="form-control">
+                    <option value="">Select Growth Stage</option>
+                    <option value="Seedling">Seedling</option>
+                    <option value="Vegetative">Vegetative</option>
+                    <option value="Flowering">Flowering</option>
+                    <option value="Fruiting">Fruiting</option>
+                    <option value="Maturity">Maturity</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="text-center mb-4">
+                <button
+                  onclick="getBioFertilizerAdvice()"
+                  class="btn btn-success btn-lg px-4"
+                >
+                  <i class="bi bi-flower1 me-2"></i>Get Bio-Fertilizer Advice
+                </button>
+              </div>
+
+              <div id="bio-fertilizer-result" class="result-container mt-4">
+                <div class="loading-overlay" style="display: none">
+                  <div class="spinner-border text-success mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="text-success">Analyzing requirements...</p>
+                </div>
+
+                <div class="advice" style="display: none">
+                  <!-- Results will be displayed here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Featured Topics -->
+            <div class="featured-topics mt-5">
+              <h4 class="section-title">Bio Fertilizer Benefits</h4>
+              <div class="row g-4">
+                <div class="col-md-4">
+                  <div class="topic-card">
+                    <i class="bi bi-heart-pulse fs-1 text-success"></i>
+                    <h5>Soil Health</h5>
+                    <p>Improves soil structure and fertility naturally</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="topic-card">
+                    <i class="bi bi-shield-check fs-1 text-success"></i>
+                    <h5>Eco-Friendly</h5>
+                    <p>Sustainable and environmentally safe solutions</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="topic-card">
+                    <i class="bi bi-graph-up fs-1 text-success"></i>
+                    <h5>Cost Effective</h5>
+                    <p>Reduces dependency on chemical fertilizers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <select id="growth-stage" class="form-control">
-            <option value="">Select Growth Stage</option>
-            <option value="Seedling">Seedling</option>
-            <option value="Vegetative">Vegetative</option>
-            <option value="Flowering">Flowering</option>
-            <option value="Fruiting">Fruiting</option>
-            <option value="Maturity">Maturity</option>
-          </select>
-        </div>
-        <button onclick="getBioFertilizerAdvice()" class="btn btn-success">
-          Get Bio-Fertilizer Advice
-        </button>
-        <div id="bio-fertilizer-result" class="result-container mt-4"></div>
       </div>
     </div>
 
