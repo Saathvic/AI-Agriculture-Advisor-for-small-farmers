@@ -100,26 +100,25 @@ async function typewriterEffect(element, html, speed = 30) {
 
 // Update the result display functions
 async function displayFormattedResponse(containerId, content) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '<div class="advice"></div>';
-  const adviceDiv = container.querySelector(".advice");
+  showLoading();
 
-  // Format and display the content
-  const formattedContent = formatAIResponse(content);
-  adviceDiv.innerHTML = formattedContent;
+  const adviceContent = document.querySelector(".advice-content");
+  const sections = formatAIResponse(content).split("<h3");
 
-  // Apply fade-in effect to each element
-  const elements = adviceDiv.querySelectorAll("p, h3, br");
-  elements.forEach((elem) => {
-    elem.style.opacity = "0";
-    elem.style.transition = "opacity 0.5s ease-in-out";
-  });
+  adviceContent.innerHTML = "";
 
-  // Fade in elements one by one
-  for (let elem of elements) {
-    elem.style.opacity = "1";
+  // Process each section
+  for (let i = 0; i < sections.length; i++) {
+    if (i === 0) continue; // Skip first empty split
+    const section = document.createElement("div");
+    section.className = "advice-section";
+    section.style.setProperty("--animation-order", i);
+    section.innerHTML = "<h3" + sections[i];
+    adviceContent.appendChild(section);
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
+
+  hideLoading();
 }
 
 // Add this function near the top with other utility functions
@@ -333,6 +332,77 @@ async function getSchemeInfo() {
 }
 
 // Add these new functions
+
+function showLoading() {
+  const loadingOverlay = document.querySelector(".loading-overlay");
+  const adviceContainer = document.querySelector(".advice");
+  loadingOverlay.style.display = "flex";
+  adviceContainer.style.display = "none";
+}
+
+function hideLoading() {
+  const loadingOverlay = document.querySelector(".loading-overlay");
+  const adviceContainer = document.querySelector(".advice");
+  loadingOverlay.style.display = "none";
+  adviceContainer.style.display = "block";
+}
+
+function copyResponse() {
+  const content = document.querySelector(".advice-content").innerText;
+  navigator.clipboard
+    .writeText(content)
+    .then(() => {
+      showToast("Advice copied to clipboard!");
+    })
+    .catch((err) => {
+      showToast("Failed to copy text");
+    });
+}
+
+function shareResponse() {
+  if (navigator.share) {
+    navigator
+      .share({
+        title: "Agriculture Advice",
+        text: document.querySelector(".advice-content").innerText,
+        url: window.location.href,
+      })
+      .catch(console.error);
+  } else {
+    showToast("Sharing not supported on this browser");
+  }
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast-message";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Add styles for toast messages
+const style = document.createElement("style");
+style.textContent = `
+  .toast-message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(44, 89, 20, 0.9);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      z-index: 1000;
+      animation: fadeInOut 3s ease-in-out;
+  }
+  
+  @keyframes fadeInOut {
+      0%, 100% { opacity: 0; }
+      10%, 90% { opacity: 1; }
+  }
+`;
+document.head.appendChild(style);
 
 async function getWeatherData() {
   const city = document.getElementById("weather-city").value;
