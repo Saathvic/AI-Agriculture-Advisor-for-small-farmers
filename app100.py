@@ -333,7 +333,10 @@ def get_bio_fertilizer_advice(crop_type, soil_type, growth_stage):
         return f"Error getting bio-fertilizer advice: {str(e)}"
 
 def get_scheme_information(state, category):
-    prompt = f"""Provide comprehensive information about agricultural schemes and loans in {state} state for {category} category.
+    prompt = f"""Provide comprehensive information about agricultural schemes and loans in {state} state for {category} category. 
+    Format all links as HTML anchor tags with target="_blank". For example:
+    <a href="https://apcob.org/" target="_blank">APCOB</a>
+    make sure the links are not invalid and they work properly.
     Structure your response in this exact format:
 
     # Government Schemes Overview
@@ -344,24 +347,25 @@ def get_scheme_information(state, category):
     - Eligibility: [List key eligibility criteria]
     - Benefits: [List main benefits]
     - Documents Required: [List essential documents]
+    - Official Website: <a href="[URL]" target="_blank">[Scheme Name] Portal</a>
 
     2. **[Another Scheme Name]**
     - Eligibility: [List key eligibility criteria]
     - Benefits: [List main benefits]
     - Documents Required: [List essential documents]
+    - Official Website: <a href="[URL]" target="_blank">[Scheme Name] Portal</a>
 
     # Application Process
     1. **Steps to Apply**
-    [List application steps]
-
+    [List application steps with clickable links where relevant]
+    
     2. **Important Deadlines**
     [Mention any deadlines or time constraints]
 
     # Additional Information
     - **Contact Details**: [Relevant office contacts]
-    - **Useful Links**: [Important websites or resources]
-
-    Note: This information is for guidance only. Please verify details with local agricultural offices."""
+    - **Official Portal**: <a href="[URL]" target="_blank">[Portal Name]</a>
+    - **More Resources**: [List with clickable links]"""
 
     try:
         response = gemini_model.generate_content(
