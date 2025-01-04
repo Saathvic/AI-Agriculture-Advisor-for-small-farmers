@@ -302,7 +302,19 @@ function getBioFertilizerAdvice() {
 async function getSchemeInfo() {
   const state = document.getElementById("state").value;
   const category = document.getElementById("scheme-category").value;
-  const resultDiv = document.getElementById("schemes-result");
+
+  if (!state || !category) {
+    showError("Please select both state and category");
+    return;
+  }
+
+  // Show loading state
+  const loadingOverlay = document.querySelector(".loading-overlay");
+  const adviceContainer = document.querySelector(".advice");
+  if (loadingOverlay && adviceContainer) {
+    loadingOverlay.style.display = "flex";
+    adviceContainer.style.display = "none";
+  }
 
   try {
     const response = await fetch("/schemes", {
@@ -316,43 +328,21 @@ async function getSchemeInfo() {
     });
 
     const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error);
+    if (data.error) throw new Error(data.error);
+
+    await displayFormattedResponse("schemes-result", data.schemes);
+    // Show the advice container
+    const adviceDiv = document.querySelector(".advice");
+    if (adviceDiv) {
+      adviceDiv.style.display = "block";
     }
-
-    // Format the response with proper HTML structure
-    const formattedResponse = `
-        <div class="schemes-container">
-            ${data.schemes
-              .split("**")
-              .map((text, index) => {
-                if (index % 2 === 1) {
-                  // This is a header/bold text
-                  return `<h3>${text}</h3>`;
-                } else {
-                  // Format normal text and lists
-                  return text
-                    .replace(/\* /g, "<li>")
-                    .replace(/\n\*/g, "\n<li>")
-                    .replace(/\n([^<])/g, "</li>\n$1")
-                    .replace(/([^>])\n/g, "$1</li>\n")
-                    .replace(/• /g, "<li>")
-                    .split("\n")
-                    .map((line) => {
-                      if (line.trim().startsWith("<li>")) {
-                        return `<ul>${line}</ul>`;
-                      }
-                      return `<p>${line}</p>`;
-                    })
-                    .join("");
-                }
-              })
-              .join("")}
-        </div>`;
-
-    displayFormattedResponse("schemes-result", data.schemes);
   } catch (error) {
-    resultDiv.innerHTML = `<div class="error">${error.message}</div>`;
+    showError(error.message);
+  } finally {
+    // Hide loading overlay
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "none";
+    }
   }
 }
 

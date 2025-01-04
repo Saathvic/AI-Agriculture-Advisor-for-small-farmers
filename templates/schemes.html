@@ -8,6 +8,14 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
@@ -50,34 +58,224 @@
       </div>
     </nav>
 
-    <div class="container py-5">
-      <h1 class="text-center mb-4">Agricultural Schemes & Loans</h1>
-      <div class="form-container">
-        <div class="mb-3">
-          <select id="state" class="form-control">
-            <option value="">Select State</option>
-            <option value="Andhra Pradesh">Andhra Pradesh</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Tamil Nadu">Tamil Nadu</option>
-            <option value="Kerala">Kerala</option>
-          </select>
+    <div class="container-fluid py-4">
+      <div class="row">
+        <!-- Left Sidebar - Weather Dashboard -->
+        <div class="col-lg-3">
+          <div class="weather-dashboard sticky-top mb-4">
+            <div class="weather-header">
+              <h5 class="mb-3 d-flex align-items-center">
+                <i class="bi bi-cloud-sun me-2"></i>Local Weather
+              </h5>
+              <div class="search-box mb-3">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="weather-city"
+                    class="form-control form-control-sm"
+                    placeholder="Enter city name"
+                  />
+                  <button
+                    class="btn btn-outline-success btn-sm"
+                    onclick="getWeatherData()"
+                  >
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="weather-data" class="weather-cards" style="display: none">
+              <div class="weather-grid">
+                <div class="weather-card">
+                  <h6>
+                    <i class="bi bi-thermometer-half me-2"></i>Temperature
+                  </h6>
+                  <div id="temperature-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-droplet me-2"></i>Humidity</h6>
+                  <div id="humidity-data" class="weather-content"></div>
+                </div>
+                <div class="weather-card">
+                  <h6><i class="bi bi-cloud me-2"></i>Conditions</h6>
+                  <div id="conditions-data" class="weather-content"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <select id="scheme-category" class="form-control">
-            <option value="">Select Category</option>
-            <option value="Crop Loans">Crop Loans</option>
-            <option value="Equipment Purchase">Equipment Purchase</option>
-            <option value="Irrigation Schemes">Irrigation Schemes</option>
-            <option value="All Schemes">All Schemes</option>
-          </select>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+          <div class="main-content-area">
+            <div class="text-center mb-4 animate__animated animate__fadeIn">
+              <h1 class="page-title">Agricultural Schemes & Loans</h1>
+              <p class="page-subtitle">
+                Find government schemes and financial assistance for farmers
+              </p>
+            </div>
+
+            <div
+              class="form-container glass-morphism animate__animated animate__fadeInUp"
+            >
+              <!-- Quick Links Section -->
+              <div class="quick-topics mb-4">
+                <h5 class="mb-3">Popular Categories:</h5>
+                <div class="d-flex flex-wrap gap-2">
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="autofillCategory('Crop Loans')"
+                  >
+                    <i class="bi bi-cash"></i> Crop Loans
+                  </button>
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="autofillCategory('Equipment Purchase')"
+                  >
+                    <i class="bi bi-tools"></i> Equipment Purchase
+                  </button>
+                  <button
+                    class="btn btn-outline-success btn-sm topic-btn"
+                    onclick="autofillCategory('Irrigation Schemes')"
+                  >
+                    <i class="bi bi-droplet"></i> Irrigation Schemes
+                  </button>
+                </div>
+              </div>
+
+              <!-- Input Section -->
+              <div class="input-section mb-4">
+                <div class="input-group mb-3">
+                  <span class="input-group-text"
+                    ><i class="bi bi-geo-alt"></i
+                  ></span>
+                  <select id="state" class="form-control">
+                    <option value="">Select State</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Kerala">Kerala</option>
+                  </select>
+                </div>
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text"
+                    ><i class="bi bi-folder"></i
+                  ></span>
+                  <select id="scheme-category" class="form-control">
+                    <option value="">Select Category</option>
+                    <option value="Crop Loans">Crop Loans</option>
+                    <option value="Equipment Purchase">
+                      Equipment Purchase
+                    </option>
+                    <option value="Irrigation Schemes">
+                      Irrigation Schemes
+                    </option>
+                    <option value="All Schemes">All Schemes</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="text-center mb-4">
+                <button
+                  onclick="getSchemeInfo()"
+                  class="btn btn-success btn-lg px-4"
+                >
+                  <i class="bi bi-search me-2"></i>Find Schemes
+                </button>
+                <button
+                  onclick="clearSchemeForm()"
+                  class="btn btn-outline-secondary btn-lg px-4 ms-2"
+                >
+                  <i class="bi bi-x-circle me-2"></i>Clear
+                </button>
+              </div>
+
+              <!-- Results Area -->
+              <div id="schemes-result" class="result-container mt-4">
+                <div class="loading-overlay" style="display: none">
+                  <div class="spinner-border text-success mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="text-success">Fetching scheme information...</p>
+                </div>
+
+                <div class="advice" style="display: none">
+                  <div class="response-header">
+                    <h3 class="response-title">Available Schemes</h3>
+                    <div class="response-actions">
+                      <button
+                        class="action-btn"
+                        onclick="copyResponse()"
+                        title="Copy"
+                      >
+                        <i class="bi bi-clipboard"></i>
+                      </button>
+                      <button
+                        class="action-btn"
+                        onclick="shareResponse()"
+                        title="Share"
+                      >
+                        <i class="bi bi-share"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="advice-content">
+                    <!-- Content will be inserted here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Featured Topics -->
+            <div class="featured-topics mt-5">
+              <h4 class="section-title">Available Support</h4>
+              <div class="row g-4">
+                <div class="col-md-4">
+                  <div class="topic-card">
+                    <i class="bi bi-bank fs-1 text-success"></i>
+                    <h5>Financial Aid</h5>
+                    <p>Government backed financial assistance</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="topic-card">
+                    <i class="bi bi-gear fs-1 text-success"></i>
+                    <h5>Equipment Support</h5>
+                    <p>Machinery and tools subsidy</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="topic-card">
+                    <i class="bi bi-arrow-up-circle fs-1 text-success"></i>
+                    <h5>Development Programs</h5>
+                    <p>Skill development initiatives</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <button onclick="getSchemeInfo()" class="btn btn-success">
-          Find Schemes
-        </button>
-        <div id="schemes-result" class="result-container mt-4"></div>
       </div>
     </div>
+
+    <script>
+      function autofillCategory(category) {
+        document.getElementById("scheme-category").value = category;
+      }
+
+      function clearSchemeForm() {
+        document.getElementById("state").value = "";
+        document.getElementById("scheme-category").value = "";
+        const resultContainer = document.getElementById("schemes-result");
+        if (resultContainer) {
+          resultContainer.querySelector(".advice").style.display = "none";
+        }
+      }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/main.js"></script>

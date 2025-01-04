@@ -333,24 +333,35 @@ def get_bio_fertilizer_advice(crop_type, soil_type, growth_stage):
         return f"Error getting bio-fertilizer advice: {str(e)}"
 
 def get_scheme_information(state, category):
-    disclaimer = """# Disclaimer
-**Important Notice**: The information provided about agricultural schemes and loans is for general guidance only. Actual schemes, eligibility criteria, and benefits may vary. Please verify all details with your local agricultural office or concerned authorities before making any decisions.
-
-"""
-    prompt = f"""{disclaimer}Provide information about agricultural schemes and loans in {state} state for {category}.
+    prompt = f"""Provide comprehensive information about agricultural schemes and loans in {state} state for {category} category.
     Structure your response in this exact format:
 
     # Government Schemes Overview
-    [Brief introduction to available schemes in {state} for {category}]
+    [Brief introduction about available schemes in {state} for {category}]
 
-    # Major Schemes
-    1. **[Scheme Name 1 for {category}]**
-    [Detailed description]
-    - Eligibility: [Criteria specific to {state}]
-    - Benefits: [Details]
-    - Documents: [Requirements]
+    # Available Schemes
+    1. **[Scheme Name]**
+    - Eligibility: [List key eligibility criteria]
+    - Benefits: [List main benefits]
+    - Documents Required: [List essential documents]
 
-    [Rest of the format...]"""
+    2. **[Another Scheme Name]**
+    - Eligibility: [List key eligibility criteria]
+    - Benefits: [List main benefits]
+    - Documents Required: [List essential documents]
+
+    # Application Process
+    1. **Steps to Apply**
+    [List application steps]
+
+    2. **Important Deadlines**
+    [Mention any deadlines or time constraints]
+
+    # Additional Information
+    - **Contact Details**: [Relevant office contacts]
+    - **Useful Links**: [Important websites or resources]
+
+    Note: This information is for guidance only. Please verify details with local agricultural offices."""
 
     try:
         response = gemini_model.generate_content(
@@ -361,9 +372,30 @@ def get_scheme_information(state, category):
                 "top_k": 40
             }
         )
-        return disclaimer + response.text
+        
+        if response.text:
+            return response.text
+        else:
+            raise Exception("No response generated")
+            
     except Exception as e:
-        return f"Error getting scheme information: {str(e)}"
+        print(f"Error in get_scheme_information: {str(e)}")  # Add debug logging
+        raise Exception(f"Error getting scheme information: {str(e)}")
+
+@app.route('/schemes', methods=['POST'])
+def schemes():
+    try:
+        state = request.form.get('state')
+        category = request.form.get('category')
+        
+        if not state or not category:
+            return jsonify({'error': 'Please select both state and category'}), 400
+        
+        schemes_info = get_scheme_information(state, category)
+        return jsonify({'schemes': schemes_info})
+    except Exception as e:
+        print(f"Error in schemes route: {str(e)}")  # Add debug logging
+        return jsonify({'error': str(e)}), 500
 
 # Routes
 @app.route('/')
@@ -462,17 +494,6 @@ def bio_fertilizer():
     
     advice = get_bio_fertilizer_advice(crop_type, soil_type, growth_stage)
     return jsonify({'advice': advice})
-
-@app.route('/schemes', methods=['POST'])
-def schemes():
-    state = request.form.get('state')
-    category = request.form.get('category')
-    
-    if not state or not category:
-        return jsonify({'error': 'Please select both state and category'}), 400
-    
-    schemes = get_scheme_information(state, category)
-    return jsonify({'schemes': schemes})
 
 @app.route('/weather', methods=['POST'])
 def get_weather():
