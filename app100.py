@@ -59,7 +59,7 @@ def analyze_image_with_llama(image):
                 }
             ],
             "temperature": 0.7,
-            "max_tokens": 100
+            "max_tokens": 300
         }
 
         response = requests.post(
