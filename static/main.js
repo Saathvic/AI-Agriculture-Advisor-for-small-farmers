@@ -268,6 +268,12 @@ function getBioFertilizerAdvice() {
     return;
   }
 
+  // Show loading state
+  const loadingOverlay = document.querySelector(".loading-overlay");
+  const adviceContainer = document.querySelector(".advice");
+  loadingOverlay.style.display = "flex";
+  adviceContainer.style.display = "none";
+
   fetch("/bio-fertilizer", {
     method: "POST",
     headers: {
@@ -283,8 +289,13 @@ function getBioFertilizerAdvice() {
     .then((data) => {
       if (data.error) throw new Error(data.error);
       displayFormattedResponse("bio-fertilizer-result", data.advice);
+      // Show the advice container
+      document.querySelector(".advice").style.display = "block";
     })
-    .catch((error) => showError(error.message));
+    .catch((error) => {
+      showError(error.message);
+      loadingOverlay.style.display = "none";
+    });
 }
 
 // Schemes Information Function

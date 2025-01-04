@@ -294,23 +294,39 @@ def get_bio_fertilizer_advice(crop_type, soil_type, growth_stage):
     Structure your response in this exact format:
 
     # Bio-Fertilizer Overview
-    [Brief introduction to recommendations for {crop_type}]
+    [Brief introduction about organic fertilization for {crop_type}]
 
-    # Detailed Recommendations
-    1. **Primary Bio-Fertilizers**
-    [Main products suitable for {crop_type} in {growth_stage} stage]
+    # Primary Recommendations
+    1. **Recommended Bio-Fertilizers**
+    [List and describe main bio-fertilizers suitable for {crop_type}]
 
-    2. **Application Methods**
-    [How to apply properly considering {soil_type} soil]
+    2. **Application Method**
+    [Detailed application instructions for {soil_type} soil]
 
-    [Rest of the format...]"""
+    # Timing and Frequency
+    1. **Application Schedule**
+    [When to apply during {growth_stage} stage]
+
+    2. **Frequency Guidelines**
+    [How often to apply]
+
+    # Best Practices
+    1. **Storage Guidelines**
+    [How to store bio-fertilizers]
+
+    2. **Safety Precautions**
+    [Safety measures during application]
+
+    # Additional Tips
+    - **Soil Preparation**: [Preparation guidelines]
+    - **Compatibility**: [What to avoid mixing]"""
 
     try:
         completion = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Updated model
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=500
+            max_tokens=800  # Increased token limit for more detailed response
         )
         return completion.choices[0].message.content
     except Exception as e:
