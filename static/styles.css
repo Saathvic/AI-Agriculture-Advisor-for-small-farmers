@@ -819,8 +819,6 @@ input[type="file"] {
   border-radius: 15px;
   padding: 1.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 20px;
 }
 
 .weather-header {
@@ -841,11 +839,11 @@ input[type="file"] {
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  margin-bottom: 1rem;
 }
 
 .weather-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .weather-card h6 {
@@ -861,25 +859,31 @@ input[type="file"] {
 }
 
 .weather-value {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
 .weather-trend {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #666;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-bottom: 0.25rem;
 }
 
 .weather-card small {
   display: block;
   color: #666;
   font-size: 0.8rem;
+}
+
+.trend-up {
+  color: #28a745;
+}
+.trend-down {
+  color: #dc3545;
 }
 
 /* Responsive adjustments */
@@ -1326,4 +1330,70 @@ input[type="file"] {
 
 .scheme-link:hover::after {
   transform: translate(2px, -2px);
+}
+
+/* Enhanced Weather Card Styles */
+.weather-dashboard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.weather-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.weather-card:hover {
+  transform: translateY(-2px);
+}
+
+.weather-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.weather-trend {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.trend-up {
+  color: #28a745;
+}
+.trend-down {
+  color: #dc3545;
+}
+
+.toast-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(44, 89, 20, 0.9);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 25px;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
 }

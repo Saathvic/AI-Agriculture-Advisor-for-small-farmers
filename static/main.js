@@ -94,7 +94,7 @@ function formatAIResponse(content) {
   );
 }
 
-// Unified display function for all features
+// Updated displayFormattedResponse function with typewriter effect
 async function displayFormattedResponse(containerId, content) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -102,15 +102,7 @@ async function displayFormattedResponse(containerId, content) {
   const adviceContent = container.querySelector(".advice-content") || container;
   const loadingOverlay = document.querySelector(".loading-overlay");
 
-  // Parse and prepare content
-  const formattedContent = formatAIResponse(content);
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = formattedContent;
-
-  // Clear existing content
-  adviceContent.innerHTML = "";
-
-  // Hide loading overlay as we begin typing
+  // Hide loading overlay
   if (loadingOverlay) {
     loadingOverlay.style.display = "none";
   }
@@ -121,16 +113,184 @@ async function displayFormattedResponse(containerId, content) {
     adviceContainer.style.display = "block";
   }
 
-  // Add formatted content directly to preserve HTML
-  adviceContent.innerHTML = formattedContent;
+  // Parse and prepare content
+  const formattedContent = formatAIResponse(content);
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = formattedContent;
 
-  // Make all links open in new tab
-  adviceContent.querySelectorAll("a").forEach((link) => {
-    link.setAttribute("target", "_blank");
-    link.setAttribute("rel", "noopener noreferrer");
-    link.classList.add("scheme-link");
+  // Clear existing content
+  adviceContent.innerHTML = "";
+
+  // Create a cursor element
+  const cursor = document.createElement("span");
+  cursor.className = "typing-cursor";
+  adviceContent.appendChild(cursor);
+
+  // Type each element with HTML preservation
+  for (const child of tempDiv.children) {
+    const element = document.createElement(child.tagName);
+    element.className = child.className;
+    adviceContent.insertBefore(element, cursor);
+
+    // Store the original HTML with formatting
+    const originalHTML = child.innerHTML;
+
+    // Type only the text content
+    await typewriterEffect(element, child.textContent, 15);
+
+    // Restore the HTML formatting after typing
+    element.innerHTML = originalHTML;
+
+    // Process any links in the element
+    element.querySelectorAll("a").forEach((link) => {
+      link.setAttribute("target", "_blank");
+      link.setAttribute("rel", "noopener noreferrer");
+      link.classList.add("scheme-link");
+    });
+
+    // Add a small delay between elements
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  // Remove cursor after completion
+  cursor.remove();
+}
+
+// Enhanced typewriter effect function
+async function typewriterEffect(element, text, speed = 15) {
+  let i = 0;
+  element.textContent = "";
+
+  return new Promise((resolve) => {
+    function type() {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        resolve();
+      }
+    }
+    type();
   });
 }
+
+// Add cursor styles if not already present
+const cursorStyle = document.createElement("style");
+cursorStyle.textContent = `
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: var(--primary-color);
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+`;
+document.head.appendChild(cursorStyle);
+
+// Unified display function for all features
+async function displayFormattedResponse(containerId, content) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const adviceContent = container.querySelector(".advice-content") || container;
+  const loadingOverlay = document.querySelector(".loading-overlay");
+
+  // Hide loading overlay
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "none";
+  }
+
+  // Show advice container
+  const adviceContainer = document.querySelector(".advice");
+  if (adviceContainer) {
+    adviceContainer.style.display = "block";
+  }
+
+  // Parse and prepare content
+  const formattedContent = formatAIResponse(content);
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = formattedContent;
+
+  // Clear existing content
+  adviceContent.innerHTML = "";
+
+  // Create and append cursor element
+  const cursor = document.createElement("span");
+  cursor.className = "typing-cursor";
+  adviceContent.appendChild(cursor);
+
+  // Type each element with cursor effect
+  for (const child of tempDiv.children) {
+    const element = document.createElement(child.tagName);
+    element.className = child.className;
+    adviceContent.insertBefore(element, cursor);
+
+    // Store original HTML
+    const originalHTML = child.innerHTML;
+    const textContent = child.textContent;
+
+    // Type the text content with cursor
+    await new Promise((resolve) => {
+      let i = 0;
+      function typeChar() {
+        if (i < textContent.length) {
+          element.textContent += textContent[i];
+          i++;
+          setTimeout(typeChar, 15);
+        } else {
+          // Restore HTML formatting after typing
+          element.innerHTML = originalHTML;
+          // Process any links
+          element.querySelectorAll("a").forEach((link) => {
+            link.setAttribute("target", "_blank");
+            link.setAttribute("rel", "noopener noreferrer");
+            link.classList.add("scheme-link");
+          });
+          resolve();
+        }
+      }
+      typeChar();
+    });
+
+    // Add delay between elements
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  // Remove cursor after completion
+  cursor.remove();
+}
+
+// Add cursor styles for typing effect
+const cursorStyles = document.createElement("style");
+cursorStyles.textContent = `
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: var(--primary-color);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .advice-content {
+    position: relative;
+  }
+`;
+document.head.appendChild(cursorStyles);
 
 // Enhanced feature handlers
 async function getAgricultureAdvice() {
