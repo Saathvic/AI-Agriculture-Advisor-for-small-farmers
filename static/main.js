@@ -19,12 +19,48 @@ async function typewriterEffect(element, text, speed = 30) {
   });
 }
 
-// Enhanced response formatter with HTML parsing
+// Enhanced response formatter with HTML parsing and URL detection
 function formatAIResponse(content) {
-  return content
+  // Save existing anchor tags by replacing them temporarily
+  let anchorTags = [];
+  content = content.replace(
+    /<a\s+(?:[^>]*?)href="([^"]*)"(?:[^>]*?)>([^<]*)<\/a>/gi,
+    (match) => {
+      anchorTags.push(match);
+      return `{{ANCHOR_${anchorTags.length - 1}}}`;
+    }
+  );
+
+  // Enhanced URL pattern that catches "Visit:" and "Portal:" prefixes
+  const urlPattern =
+    /(?:Visit:|Portal:)\s+(https?:\/\/[^\s]+)|(?:https?:\/\/[^\s]+)|(?:www\.[^\s]+)/gi;
+
+  function formatUrl(match, url) {
+    // If url is undefined, the match didn't have a prefix
+    if (!url) {
+      url = match;
+    }
+
+    // Add https:// if missing
+    if (!url.match(/^https?:\/\//)) {
+      url = "https://" + url;
+    }
+
+    // Get the display text (remove trailing punctuation)
+    const displayUrl = url.replace(/[.,]+$/, "");
+
+    // Create the link with scheme-link class
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="scheme-link">${displayUrl}</a>`;
+  }
+
+  const formattedContent = content
     .split("\n")
     .map((line) => {
       if (line.trim() === "") return "<br>";
+
+      // Format URLs in the line that aren't already in anchor tags
+      line = line.replace(urlPattern, formatUrl);
+
       if (line.startsWith("# ")) {
         return `<h3 class="mt-4 mb-3">${line.substring(2)}</h3>`;
       }
@@ -40,12 +76,22 @@ function formatAIResponse(content) {
           '<p class="mb-2">• <strong>$1</strong>$2</p>'
         );
       }
+      if (line.startsWith("* ")) {
+        return line.replace(/\* (.*)/, '<p class="mb-2 ms-3">• $1</p>');
+      }
+
       return `<p class="mb-2">${line.replace(
         /\*\*(.*?)\*\*/g,
         "<strong>$1</strong>"
       )}</p>`;
     })
     .join("");
+
+  // Restore anchor tags
+  return formattedContent.replace(
+    /{{ANCHOR_(\d+)}}/g,
+    (match, index) => anchorTags[parseInt(index)]
+  );
 }
 
 // Unified display function for all features
@@ -75,13 +121,15 @@ async function displayFormattedResponse(containerId, content) {
     adviceContainer.style.display = "block";
   }
 
-  // Type each element
-  for (let child of tempDiv.children) {
-    const element = document.createElement(child.tagName);
-    element.className = child.className;
-    adviceContent.appendChild(element);
-    await typewriterEffect(element, child.textContent, 10);
-  }
+  // Add formatted content directly to preserve HTML
+  adviceContent.innerHTML = formattedContent;
+
+  // Make all links open in new tab
+  adviceContent.querySelectorAll("a").forEach((link) => {
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener noreferrer");
+    link.classList.add("scheme-link");
+  });
 }
 
 // Enhanced feature handlers
