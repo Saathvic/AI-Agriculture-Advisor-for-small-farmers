@@ -1449,3 +1449,27 @@ input[type="file"] {
 }
 
 /* ...existing code... */
+
+/* ...existing code... */
+
+.crop-recommendations {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.crop-recommendations h5 {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.crop-recommendations .advice-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ...existing code... */

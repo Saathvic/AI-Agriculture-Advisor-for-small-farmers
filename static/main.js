@@ -506,10 +506,7 @@ function displayWeatherData(data) {
   const weatherDataEl = document.getElementById("weather-data");
   weatherDataEl.innerHTML = ""; // Clear old data
 
-  const weatherGrid = document.createElement("div");
-  weatherGrid.classList.add("weather-grid");
-
-  // Add city name as header
+  // Add city header
   const cityHeader = document.createElement("div");
   cityHeader.className = "weather-header text-center mb-3";
   cityHeader.innerHTML = `<h5>${
@@ -517,19 +514,21 @@ function displayWeatherData(data) {
   }</h5>`;
   weatherDataEl.appendChild(cityHeader);
 
-  // Loop through the 7-day forecast
+  // Create weather grid
+  const weatherGrid = document.createElement("div");
+  weatherGrid.classList.add("weather-grid");
+
+  // Display 7-day forecast
   data.forecast.forEach((dayInfo) => {
     const dayCard = document.createElement("div");
     dayCard.classList.add("weather-card");
 
-    // Format the date
     const dateObj = new Date(dayInfo.date);
     const formattedDate = dateObj.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
 
-    // Select weather icon based on condition
     const weatherIcon = getWeatherIcon(dayInfo.condition);
 
     dayCard.innerHTML = `
@@ -545,6 +544,19 @@ function displayWeatherData(data) {
   });
 
   weatherDataEl.appendChild(weatherGrid);
+
+  // Display crop recommendations if available
+  if (data.recommendations) {
+    const recommendationsDiv = document.createElement("div");
+    recommendationsDiv.className = "crop-recommendations mt-4";
+    recommendationsDiv.innerHTML = `
+        <h5 class="text-center mb-3">Crop Recommendations</h5>
+        <div class="advice-content">
+            ${formatAIResponse(data.recommendations)}
+        </div>
+    `;
+    weatherDataEl.appendChild(recommendationsDiv);
+  }
 }
 
 function getWeatherIcon(condition) {

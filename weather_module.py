@@ -85,9 +85,40 @@ class WeatherAnalyzer:
         rain_count = sum(1 for item in forecast['list'][:8] if 'rain' in item)
         return round((rain_count / 8) * 100, 1)
 
+def get_weather_based_recommendations(forecast_data):
+    """
+    Analyze weather forecast and return crop recommendations
+    """
+    try:
+        # Aggregate weather conditions
+        conditions = {
+            'temps': [],
+            'conditions': [],
+            'dates': []
+        }
+        
+        for day in forecast_data['forecast']:
+            conditions['temps'].append(day['temp'])
+            conditions['conditions'].append(day['condition'])
+            conditions['dates'].append(day['date'])
+        
+        avg_temp = sum(conditions['temps']) / len(conditions['temps'])
+        weather_summary = f"""
+Next 7 days weather analysis:
+Temperature Range: {min(conditions['temps'])}°C to {max(conditions['temps'])}°C
+Average Temperature: {round(avg_temp, 1)}°C
+Weather Conditions: {', '.join(set(conditions['conditions']))}
+Forecast Period: {conditions['dates'][0]} to {conditions['dates'][-1]}
+"""
+        return weather_summary
+        
+    except Exception as e:
+        print(f"Error in get_weather_based_recommendations: {str(e)}")
+        return None
+
 def get_7_day_forecast(city):
     """
-    Return a 7-day forecast for the given city.
+    Return a 7-day forecast with crop recommendations
     """
     try:
         api_key = "c59af85b5caea78569d616126ca7928e"
@@ -143,8 +174,15 @@ def get_7_day_forecast(city):
                 "temp": round(avg_temp),
                 "condition": condition
             })
+        
+        forecast_data = {"forecast": forecast}
+        
+        # Get weather summary for recommendations
+        weather_summary = get_weather_based_recommendations(forecast_data)
+        if weather_summary:
+            forecast_data["weather_summary"] = weather_summary
             
-        return {"forecast": forecast}
+        return forecast_data
         
     except Exception as e:
         print(f"Error in get_7_day_forecast: {str(e)}")  # Add debug logging

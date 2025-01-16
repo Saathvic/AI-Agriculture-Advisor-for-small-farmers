@@ -386,6 +386,41 @@ def get_scheme_information(state, category):
         print(f"Error in get_scheme_information: {str(e)}")  # Add debug logging
         raise Exception(f"Error getting scheme information: {str(e)}")
 
+def get_crop_recommendations(weather_summary):
+    prompt = f"""Based on the following weather forecast, provide detailed crop recommendations:
+
+{weather_summary}
+
+Structure your response in this exact format:
+
+# Crop Recommendations Based on Weather Forecast
+
+1. **Suitable Crops**
+[List 3-4 crops that would thrive in these conditions]
+
+2. **Planting Advice**
+[Specific planting recommendations considering the weather]
+
+3. **Precautionary Measures**
+[Weather-specific precautions farmers should take]
+
+4. **Irrigation Guidelines**
+[Water management advice based on forecast]
+
+5. **Additional Recommendations**
+[Any other relevant advice based on the weather conditions]"""
+
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=800
+        )
+        return completion.choices[0].message.content
+    except Exception as e:
+        return f"Error getting crop recommendations: {str(e)}"
+
 @app.route('/schemes', methods=['POST'])
 def schemes():
     try:
@@ -505,12 +540,20 @@ def get_weather():
     if not city:
         return jsonify({'error': 'Please provide a city name'}), 400
 
-    # Replace single-day call with 7-day forecast
-    forecast_data = get_7_day_forecast(city)
-    if 'error' in forecast_data:
-        return jsonify({'error': forecast_data['error']}), 500
+    try:
+        # Get weather forecast
+        forecast_data = get_7_day_forecast(city)
+        if 'error' in forecast_data:
+            return jsonify({'error': forecast_data['error']}), 500
 
-    return jsonify(forecast_data)
+        # Get crop recommendations based on weather
+        if 'weather_summary' in forecast_data:
+            recommendations = get_crop_recommendations(forecast_data['weather_summary'])
+            forecast_data['recommendations'] = recommendations
+
+        return jsonify(forecast_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
