@@ -1348,15 +1348,10 @@ input[type="file"] {
   transition: transform 0.3s ease;
 }
 
-.weather-card:hover {
-  transform: translateY(-2px);
-}
-
 .weather-value {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--primary-color);
-  margin-bottom: 0.5rem;
 }
 
 .weather-trend {

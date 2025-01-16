@@ -470,6 +470,89 @@ async function getSchemeInfo() {
   }
 }
 
+// Add new weather functions without affecting existing code
+async function getWeatherData() {
+  const city = document.getElementById("weather-city").value;
+  if (!city) {
+    showToast("Please enter a city name");
+    return;
+  }
+
+  try {
+    const response = await fetch("/weather", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `city=${encodeURIComponent(city)}`,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    // Display weather data
+    document.getElementById("weather-data").style.display = "block";
+    displayWeatherData(data);
+  } catch (error) {
+    showToast(error.message);
+    document.getElementById("weather-data").style.display = "none";
+  }
+}
+
+function displayWeatherData(data) {
+  // Temperature
+  const tempHtml = `
+        <div class="weather-value">${data.temperature_data.current}°C</div>
+        <div class="weather-trend ${
+          data.temperature_data.trend === "rising" ? "trend-up" : "trend-down"
+        }">
+            <i class="bi bi-arrow-${
+              data.temperature_data.trend === "rising" ? "up" : "down"
+            }"></i>
+            ${data.temperature_data.trend}
+        </div>
+        <small>Range: ${data.temperature_data.min}°C - ${
+    data.temperature_data.max
+  }°C</small>
+    `;
+  document.getElementById("temperature-data").innerHTML = tempHtml;
+
+  // Humidity
+  const humidityHtml = `
+        <div class="weather-value">${data.humidity_data.current}%</div>
+        <div class="weather-trend">
+            <i class="bi bi-arrow-${
+              data.humidity_data.trend === "rising" ? "up" : "down"
+            }"></i>
+            ${data.humidity_data.trend}
+        </div>
+        <small>High humidity: ${data.humidity_data.high_humidity_hours}h</small>
+    `;
+  document.getElementById("humidity-data").innerHTML = humidityHtml;
+
+  // Conditions
+  const conditionsHtml = `
+        <div class="weather-value">${data.weather_conditions.current}</div>
+        <div class="weather-trend">
+            <i class="bi bi-cloud-rain"></i>
+            Rain chance: ${data.weather_conditions.precipitation_probability}%
+        </div>
+        <small>Wind: ${data.water_management.wind_speed} m/s</small>
+    `;
+  document.getElementById("conditions-data").innerHTML = conditionsHtml;
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast-message";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Make weather functions globally available
+window.getWeatherData = getWeatherData;
+
 // Utility functions
 function showLoading() {
   const loadingOverlay = document.querySelector(".loading-overlay");

@@ -338,7 +338,7 @@ def get_scheme_information(state, category):
     <a href="https://apcob.org/" target="_blank">APCOB</a>
     make sure the links are not invalid and they work properly.
     Structure your response in this exact format:
-
+    Dsiclaimer : The information provided here is for reference purposes only. Please verify the details with the official sources before applying.
     # Government Schemes Overview
     [Brief introduction about available schemes in {state} for {category}]
 
