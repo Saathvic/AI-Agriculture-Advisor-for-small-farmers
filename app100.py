@@ -483,7 +483,7 @@ def water_management():
     crop_type = request.form.get('crop_type')
     soil_type = request.form.get('soil_type')
     
-    if not crop_type or not soil_type:
+    if not crop_type or soil_type:
         return jsonify({'error': 'Please provide both crop type and soil type'}), 400
     
     advice = get_water_advice(crop_type, soil_type)
@@ -545,15 +545,10 @@ def get_weather():
         return jsonify({'error': 'Please provide a city name'}), 400
 
     try:
-        # Get weather forecast
+        # Get weather forecast only
         forecast_data = get_7_day_forecast(city)
         if 'error' in forecast_data:
             return jsonify({'error': forecast_data['error']}), 500
-
-        # Get crop recommendations based on weather
-        if 'weather_summary' in forecast_data:
-            recommendations = get_crop_recommendations(forecast_data['weather_summary'])
-            forecast_data['recommendations'] = recommendations
 
         return jsonify(forecast_data)
     except Exception as e:

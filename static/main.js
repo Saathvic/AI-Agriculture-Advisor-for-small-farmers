@@ -544,19 +544,6 @@ function displayWeatherData(data) {
   });
 
   weatherDataEl.appendChild(weatherGrid);
-
-  // Display crop recommendations if available
-  if (data.recommendations) {
-    const recommendationsDiv = document.createElement("div");
-    recommendationsDiv.className = "crop-recommendations mt-4";
-    recommendationsDiv.innerHTML = `
-        <h5 class="text-center mb-3">Crop Recommendations</h5>
-        <div class="advice-content">
-            ${formatAIResponse(data.recommendations)}
-        </div>
-    `;
-    weatherDataEl.appendChild(recommendationsDiv);
-  }
 }
 
 function getWeatherIcon(condition) {
