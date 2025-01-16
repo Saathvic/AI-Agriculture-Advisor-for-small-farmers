@@ -465,6 +465,10 @@ def bio_fertilizer_page():
 def schemes_page():
     return render_template('schemes.html')
 
+@app.route('/crop-recommendations')
+def crop_recommendations_page():
+    return render_template('crop-recommendations.html')
+
 @app.route('/get-advice', methods=['POST'])
 def get_advice():
     question = request.form.get('question')
@@ -552,6 +556,28 @@ def get_weather():
             forecast_data['recommendations'] = recommendations
 
         return jsonify(forecast_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get-crop-recommendations', methods=['POST'])
+def get_crop_recommendations_route():
+    city = request.form.get('city')
+    if not city:
+        return jsonify({'error': 'Please provide a city name'}), 400
+
+    try:
+        # Get weather forecast
+        forecast_data = get_7_day_forecast(city)
+        if 'error' in forecast_data:
+            return jsonify({'error': forecast_data['error']}), 500
+
+        # Get crop recommendations based on weather
+        recommendations = get_crop_recommendations(forecast_data['weather_summary'])
+        
+        return jsonify({
+            'weather_summary': forecast_data['weather_summary'],
+            'recommendations': recommendations
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

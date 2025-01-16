@@ -1473,3 +1473,31 @@ input[type="file"] {
 }
 
 /* ...existing code... */
+
+/* ...existing code... */
+
+.weather-text {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.weather-summary .card {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.weather-summary .card-title {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ...existing code... */

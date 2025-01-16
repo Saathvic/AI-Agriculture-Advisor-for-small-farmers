@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Recommendations - Smart Farming</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+      <div class="container">
+        <a class="navbar-brand" href="/">Smart Farming</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/agriculture">Agriculture Advice</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/water">Water Management</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/image">Image Analysis</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/disease">Disease Detection</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/bio-fertilizer">Bio Fertilizer</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/schemes">Schemes & Loans</a>
+            </li>
+            <!-- Add this to the navbar in all template files -->
+            <li class="nav-item">
+              <a class="nav-link" href="/crop-recommendations"
+                >Crop Recommendations</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="text-center mb-4 animate__animated animate__fadeIn">
+            <h1 class="page-title">Weather-Based Crop Recommendations</h1>
+            <p class="page-subtitle">
+              Get intelligent crop suggestions based on weather forecast
+            </p>
+          </div>
+
+          <div
+            class="form-container glass-morphism animate__animated animate__fadeInUp"
+          >
+            <div class="input-section mb-4">
+              <div class="input-group">
+                <span class="input-group-text"
+                  ><i class="bi bi-geo-alt"></i
+                ></span>
+                <input
+                  type="text"
+                  id="city-input"
+                  class="form-control"
+                  placeholder="Enter city name"
+                />
+                <button class="btn btn-success" onclick="getWeatherAndCrops()">
+                  <i class="bi bi-search me-2"></i>Get Recommendations
+                </button>
+              </div>
+            </div>
+
+            <!-- Results Area -->
+            <div id="recommendations-result" class="result-container mt-4">
+              <div class="loading-overlay" style="display: none">
+                <div class="spinner-border text-success mb-3" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-success">Analyzing weather patterns...</p>
+              </div>
+
+              <div class="weather-summary mb-4" style="display: none">
+                <!-- Weather summary will be inserted here -->
+              </div>
+
+              <div class="advice" style="display: none">
+                <div class="response-header">
+                  <h3 class="response-title">Crop Recommendations</h3>
+                  <div class="response-actions">
+                    <button
+                      class="action-btn"
+                      onclick="copyResponse()"
+                      title="Copy"
+                    >
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                    <button
+                      class="action-btn"
+                      onclick="shareResponse()"
+                      title="Share"
+                    >
+                      <i class="bi bi-share"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="advice-content">
+                  <!-- Content will be inserted here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add your existing footer here -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/main.js"></script>
+    <script>
+      async function getWeatherAndCrops() {
+        const city = document.getElementById("city-input").value;
+        if (!city) {
+          showToast("Please enter a city name");
+          return;
+        }
+
+        showLoading();
+
+        try {
+          const response = await fetch("/get-crop-recommendations", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `city=${encodeURIComponent(city)}`,
+          });
+
+          const data = await response.json();
+          if (data.error) throw new Error(data.error);
+
+          // Display weather summary
+          const weatherSummary = document.querySelector(".weather-summary");
+          weatherSummary.style.display = "block";
+          weatherSummary.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Weather Forecast Summary</h5>
+                            <pre class="weather-text">${data.weather_summary}</pre>
+                        </div>
+                    </div>
+                `;
+
+          // Display recommendations
+          await displayFormattedResponse(
+            "recommendations-result",
+            data.recommendations
+          );
+        } catch (error) {
+          showToast(error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+    </script>
+  </body>
+</html>
