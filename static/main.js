@@ -478,6 +478,10 @@ async function getWeatherData() {
     return;
   }
 
+  const weatherData = document.getElementById("weather-data");
+  weatherData.style.display = "none";
+  showToast("Fetching weather data...");
+
   try {
     const response = await fetch("/weather", {
       method: "POST",
@@ -491,11 +495,10 @@ async function getWeatherData() {
     if (data.error) throw new Error(data.error);
 
     // Display weather data
-    document.getElementById("weather-data").style.display = "block";
+    weatherData.style.display = "block";
     displayWeatherData(data);
   } catch (error) {
     showToast(error.message);
-    document.getElementById("weather-data").style.display = "none";
   }
 }
 
@@ -506,24 +509,35 @@ function displayWeatherData(data) {
   const weatherGrid = document.createElement("div");
   weatherGrid.classList.add("weather-grid");
 
+  // Add city name as header
+  const cityHeader = document.createElement("div");
+  cityHeader.className = "weather-header text-center mb-3";
+  cityHeader.innerHTML = `<h5>${
+    document.getElementById("weather-city").value
+  }</h5>`;
+  weatherDataEl.appendChild(cityHeader);
+
   // Loop through the 7-day forecast
   data.forecast.forEach((dayInfo) => {
     const dayCard = document.createElement("div");
     dayCard.classList.add("weather-card");
 
-    // Format the date for display
+    // Format the date
     const dateObj = new Date(dayInfo.date);
     const formattedDate = dateObj.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
 
+    // Select weather icon based on condition
+    const weatherIcon = getWeatherIcon(dayInfo.condition);
+
     dayCard.innerHTML = `
         <h6>${dayInfo.day}</h6>
         <small>${formattedDate}</small>
         <div class="weather-value">${dayInfo.temp}°C</div>
         <div class="weather-condition">
-            <i class="bi bi-cloud"></i>
+            <i class="bi ${weatherIcon}"></i>
             <span>${dayInfo.condition}</span>
         </div>
     `;
@@ -531,6 +545,16 @@ function displayWeatherData(data) {
   });
 
   weatherDataEl.appendChild(weatherGrid);
+}
+
+function getWeatherIcon(condition) {
+  condition = condition.toLowerCase();
+  if (condition.includes("clear")) return "bi-sun";
+  if (condition.includes("cloud")) return "bi-cloud";
+  if (condition.includes("rain")) return "bi-cloud-rain";
+  if (condition.includes("snow")) return "bi-snow";
+  if (condition.includes("thunder")) return "bi-lightning";
+  return "bi-cloud"; // default icon
 }
 
 function showToast(message) {

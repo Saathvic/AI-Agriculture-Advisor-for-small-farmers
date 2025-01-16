@@ -96,8 +96,8 @@ def get_7_day_forecast(city):
         params = {
             "q": city,
             "appid": api_key,
-            "units": "metric",
-            "cnt": 7  # Get 7 days of data
+            "units": "metric",  # Use metric units for Celsius
+            "cnt": 40  # Get maximum data points (5 days * 8 points per day)
         }
         
         response = requests.get(base_url, params=params)
@@ -106,19 +106,46 @@ def get_7_day_forecast(city):
         if response.status_code != 200:
             return {"error": data.get("message", "Failed to fetch weather data")}
             
-        # Get current date for reference
+        # Group forecast by day
+        daily_forecasts = {}
+        for item in data['list']:
+            date = datetime.fromtimestamp(item['dt']).strftime('%Y-%m-%d')
+            if date not in daily_forecasts:
+                daily_forecasts[date] = {
+                    'temps': [],
+                    'conditions': []
+                }
+            daily_forecasts[date]['temps'].append(item['main']['temp'])
+            daily_forecasts[date]['conditions'].append(item['weather'][0]['description'])
+        
+        # Create 7-day forecast
+        forecast = []
         current_date = datetime.now()
         
-        forecast = []
         for i in range(7):
             next_date = current_date + timedelta(days=i)
+            date_str = next_date.strftime('%Y-%m-%d')
+            
+            # If we have data for this date, use it
+            if date_str in daily_forecasts:
+                avg_temp = sum(daily_forecasts[date_str]['temps']) / len(daily_forecasts[date_str]['temps'])
+                # Get most common condition for the day
+                condition = max(set(daily_forecasts[date_str]['conditions']), key=daily_forecasts[date_str]['conditions'].count)
+            else:
+                # For days beyond the API's forecast, use the last available data
+                last_date = list(daily_forecasts.keys())[-1]
+                avg_temp = sum(daily_forecasts[last_date]['temps']) / len(daily_forecasts[last_date]['temps'])
+                condition = max(set(daily_forecasts[last_date]['conditions']), key=daily_forecasts[last_date]['conditions'].count)
+            
             forecast.append({
-                "date": next_date.strftime("%Y-%m-%d"),
+                "date": date_str,
                 "day": next_date.strftime("%A"),
-                "temp": round(data['list'][i]['main']['temp']),
-                "condition": data['list'][i]['weather'][0]['description']
+                "temp": round(avg_temp),
+                "condition": condition
             })
             
         return {"forecast": forecast}
+        
     except Exception as e:
+        print(f"Error in get_7_day_forecast: {str(e)}")  # Add debug logging
         return {"error": str(e)}
