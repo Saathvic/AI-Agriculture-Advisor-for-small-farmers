@@ -1,6 +1,6 @@
 import requests
 import statistics
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class WeatherAnalyzer:
     def __init__(self, api_key="c59af85b5caea78569d616126ca7928e"):
@@ -84,3 +84,41 @@ class WeatherAnalyzer:
     def _calculate_precipitation_probability(self, forecast):
         rain_count = sum(1 for item in forecast['list'][:8] if 'rain' in item)
         return round((rain_count / 8) * 100, 1)
+
+def get_7_day_forecast(city):
+    """
+    Return a 7-day forecast for the given city.
+    """
+    try:
+        api_key = "c59af85b5caea78569d616126ca7928e"
+        base_url = "https://api.openweathermap.org/data/2.5/forecast"
+        
+        params = {
+            "q": city,
+            "appid": api_key,
+            "units": "metric",
+            "cnt": 7  # Get 7 days of data
+        }
+        
+        response = requests.get(base_url, params=params)
+        data = response.json()
+        
+        if response.status_code != 200:
+            return {"error": data.get("message", "Failed to fetch weather data")}
+            
+        # Get current date for reference
+        current_date = datetime.now()
+        
+        forecast = []
+        for i in range(7):
+            next_date = current_date + timedelta(days=i)
+            forecast.append({
+                "date": next_date.strftime("%Y-%m-%d"),
+                "day": next_date.strftime("%A"),
+                "temp": round(data['list'][i]['main']['temp']),
+                "condition": data['list'][i]['weather'][0]['description']
+            })
+            
+        return {"forecast": forecast}
+    except Exception as e:
+        return {"error": str(e)}

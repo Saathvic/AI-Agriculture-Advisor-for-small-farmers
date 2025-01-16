@@ -500,46 +500,37 @@ async function getWeatherData() {
 }
 
 function displayWeatherData(data) {
-  // Temperature
-  const tempHtml = `
-        <div class="weather-value">${data.temperature_data.current}°C</div>
-        <div class="weather-trend ${
-          data.temperature_data.trend === "rising" ? "trend-up" : "trend-down"
-        }">
-            <i class="bi bi-arrow-${
-              data.temperature_data.trend === "rising" ? "up" : "down"
-            }"></i>
-            ${data.temperature_data.trend}
-        </div>
-        <small>Range: ${data.temperature_data.min}°C - ${
-    data.temperature_data.max
-  }°C</small>
-    `;
-  document.getElementById("temperature-data").innerHTML = tempHtml;
+  const weatherDataEl = document.getElementById("weather-data");
+  weatherDataEl.innerHTML = ""; // Clear old data
 
-  // Humidity
-  const humidityHtml = `
-        <div class="weather-value">${data.humidity_data.current}%</div>
-        <div class="weather-trend">
-            <i class="bi bi-arrow-${
-              data.humidity_data.trend === "rising" ? "up" : "down"
-            }"></i>
-            ${data.humidity_data.trend}
-        </div>
-        <small>High humidity: ${data.humidity_data.high_humidity_hours}h</small>
-    `;
-  document.getElementById("humidity-data").innerHTML = humidityHtml;
+  const weatherGrid = document.createElement("div");
+  weatherGrid.classList.add("weather-grid");
 
-  // Conditions
-  const conditionsHtml = `
-        <div class="weather-value">${data.weather_conditions.current}</div>
-        <div class="weather-trend">
-            <i class="bi bi-cloud-rain"></i>
-            Rain chance: ${data.weather_conditions.precipitation_probability}%
+  // Loop through the 7-day forecast
+  data.forecast.forEach((dayInfo) => {
+    const dayCard = document.createElement("div");
+    dayCard.classList.add("weather-card");
+
+    // Format the date for display
+    const dateObj = new Date(dayInfo.date);
+    const formattedDate = dateObj.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    dayCard.innerHTML = `
+        <h6>${dayInfo.day}</h6>
+        <small>${formattedDate}</small>
+        <div class="weather-value">${dayInfo.temp}°C</div>
+        <div class="weather-condition">
+            <i class="bi bi-cloud"></i>
+            <span>${dayInfo.condition}</span>
         </div>
-        <small>Wind: ${data.water_management.wind_speed} m/s</small>
     `;
-  document.getElementById("conditions-data").innerHTML = conditionsHtml;
+    weatherGrid.appendChild(dayCard);
+  });
+
+  weatherDataEl.appendChild(weatherGrid);
 }
 
 function showToast(message) {

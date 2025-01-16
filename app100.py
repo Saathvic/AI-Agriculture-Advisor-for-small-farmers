@@ -9,7 +9,7 @@ import io
 import requests
 import google.generativeai as genai
 from werkzeug.utils import secure_filename
-from weather_module import WeatherAnalyzer
+from weather_module import WeatherAnalyzer, get_7_day_forecast
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -504,14 +504,13 @@ def get_weather():
     city = request.form.get('city')
     if not city:
         return jsonify({'error': 'Please provide a city name'}), 400
-    
-    weather_analyzer = WeatherAnalyzer()
-    weather_data = weather_analyzer.get_weather_data(city)
-    
-    if 'error' in weather_data:
-        return jsonify({'error': weather_data['error']}), 500
-        
-    return jsonify(weather_data)
+
+    # Replace single-day call with 7-day forecast
+    forecast_data = get_7_day_forecast(city)
+    if 'error' in forecast_data:
+        return jsonify({'error': forecast_data['error']}), 500
+
+    return jsonify(forecast_data)
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

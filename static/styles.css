@@ -1392,3 +1392,60 @@ input[type="file"] {
     opacity: 1;
   }
 }
+
+/* ...existing code... */
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.weather-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.weather-card:hover {
+  transform: translateY(-5px);
+}
+
+.weather-card h6 {
+  color: var(--primary-color);
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.weather-card small {
+  display: block;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.weather-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0.5rem 0;
+}
+
+.weather-condition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .weather-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+/* ...existing code... */
