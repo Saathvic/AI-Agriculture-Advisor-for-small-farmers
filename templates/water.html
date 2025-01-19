@@ -126,8 +126,29 @@
               <div
                 class="form-container glass-morphism animate__animated animate__fadeInUp"
               >
-                <div class="mb-4">
-                  <h5 class="mb-3">Crop Information</h5>
+                <!-- Add Language and Voice Input Controls -->
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <button
+                    class="btn btn-outline-success btn-sm"
+                    onclick="startVoiceInput()"
+                  >
+                    <i class="bi bi-mic"></i> Voice Input
+                  </button>
+                  <select
+                    id="language"
+                    class="form-select form-select-sm"
+                    style="width: auto"
+                  >
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="ta">தமிழ்</option>
+                  </select>
+                </div>
+
+                <div class="input-section mb-4">
                   <div class="input-group mb-3">
                     <span class="input-group-text"
                       ><i class="bi bi-tree"></i
@@ -136,26 +157,31 @@
                       type="text"
                       id="crop-type"
                       class="form-control"
-                      placeholder="Enter Crop Type"
+                      placeholder="Enter crop type"
                     />
                   </div>
-                  <div class="input-group">
+
+                  <div class="input-group mb-3">
                     <span class="input-group-text"
                       ><i class="bi bi-layers"></i
                     ></span>
                     <select id="soil-type" class="form-control">
                       <option value="">Select Soil Type</option>
-                      <option value="Sandy">Sandy</option>
-                      <option value="Clay">Clay</option>
-                      <option value="Loamy">Loamy</option>
-                      <option value="Silt">Silt</option>
+                      <option value="Sandy">Sandy Soil</option>
+                      <option value="Clay">Clay Soil</option>
+                      <option value="Loamy">Loamy Soil</option>
+                      <option value="Silt">Silt Soil</option>
+                      <option value="Peat">Peat Soil</option>
+                      <option value="Chalk">Chalk Soil</option>
+                      <option value="Black">Black Soil</option>
+                      <option value="Red">Red Soil</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="text-center mb-4">
                   <button
-                    onclick="getWaterAdvice()"
+                    onclick="window.getWaterAdvice()"
                     class="btn btn-success btn-lg px-4"
                   >
                     <i class="bi bi-droplet me-2"></i>Get Water Advice
@@ -278,5 +304,36 @@
         </div>
       </div>
     </footer>
+
+    <script>
+      function startVoiceInput() {
+        if ("webkitSpeechRecognition" in window) {
+          const recognition = new webkitSpeechRecognition();
+          const language = document.getElementById("language").value;
+          const langMap = {
+            en: "en-US",
+            hi: "hi-IN",
+            te: "te-IN",
+            ta: "ta-IN",
+          };
+          recognition.lang = langMap[language] || "en-US";
+          recognition.onresult = function (event) {
+            document.getElementById("crop-type").value =
+              event.results[0][0].transcript;
+          };
+          recognition.start();
+        } else {
+          alert("Voice input is not supported in your browser");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("language")
+          .addEventListener("change", function () {
+            console.log("Language changed to:", this.value);
+          });
+      });
+    </script>
   </body>
 </html>

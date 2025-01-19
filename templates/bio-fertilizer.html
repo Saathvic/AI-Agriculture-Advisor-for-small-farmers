@@ -121,6 +121,28 @@
             <div
               class="form-container glass-morphism animate__animated animate__fadeInUp"
             >
+              <!-- Add Language and Voice Input Controls -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <button
+                  class="btn btn-outline-success btn-sm"
+                  onclick="startVoiceInput()"
+                >
+                  <i class="bi bi-mic"></i> Voice Input
+                </button>
+                <select
+                  id="language"
+                  class="form-select form-select-sm"
+                  style="width: auto"
+                >
+                  <option value="en">English</option>
+                  <option value="hi">हिंदी</option>
+                  <option value="te">తెలుగు</option>
+                  <option value="ta">தமிழ்</option>
+                </select>
+              </div>
+
               <div class="input-section mb-4">
                 <div class="input-group mb-3">
                   <span class="input-group-text"
@@ -277,5 +299,35 @@
         </div>
       </div>
     </footer>
+
+    <script>
+      function startVoiceInput() {
+        if ("webkitSpeechRecognition" in window) {
+          const recognition = new webkitSpeechRecognition();
+          const language = document.getElementById("language").value;
+          const langMap = {
+            en: "en-US",
+            hi: "hi-IN",
+            te: "te-IN",
+            ta: "ta-IN",
+          };
+          recognition.lang = langMap[language] || "en-US";
+          recognition.onresult = function (event) {
+            document.getElementById("bio-crop-type").value =
+              event.results[0][0].transcript;
+          };
+          recognition.start();
+        } else {
+          alert("Voice input is not supported in your browser");
+        }
+      }
+
+      // Add language change listener
+      document
+        .getElementById("language")
+        .addEventListener("change", function () {
+          console.log("Language changed to:", this.value);
+        });
+    </script>
   </body>
 </html>

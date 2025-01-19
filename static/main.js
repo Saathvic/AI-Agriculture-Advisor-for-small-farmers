@@ -113,7 +113,29 @@ async function displayFormattedResponse(containerId, content) {
     adviceContainer.style.display = "block";
   }
 
-  // Parse and prepare content
+  // Add retry mechanism for incomplete responses
+  if (content.length < 100 || !content.includes("# Additional Tips")) {
+    showToast("Retrying to get complete response...");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Retry the last request
+    try {
+      const lastRequest = await fetch(window.lastRequestUrl, {
+        method: "POST",
+        headers: window.lastRequestHeaders,
+        body: window.lastRequestBody,
+      });
+
+      const data = await lastRequest.json();
+      if (data.error) throw new Error(data.error);
+
+      content = data.advice;
+    } catch (error) {
+      console.error("Retry failed:", error);
+    }
+  }
+
+  // Parse and format content once
   const formattedContent = formatAIResponse(content);
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = formattedContent;
@@ -121,38 +143,43 @@ async function displayFormattedResponse(containerId, content) {
   // Clear existing content
   adviceContent.innerHTML = "";
 
-  // Create a cursor element
+  // Create cursor element
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   adviceContent.appendChild(cursor);
 
-  // Type each element with HTML preservation
+  // Type each element with cursor effect
   for (const child of tempDiv.children) {
     const element = document.createElement(child.tagName);
     element.className = child.className;
     adviceContent.insertBefore(element, cursor);
 
-    // Store the original HTML with formatting
     const originalHTML = child.innerHTML;
+    const textContent = child.textContent;
 
-    // Type only the text content
-    await typewriterEffect(element, child.textContent, 15);
-
-    // Restore the HTML formatting after typing
-    element.innerHTML = originalHTML;
-
-    // Process any links in the element
-    element.querySelectorAll("a").forEach((link) => {
-      link.setAttribute("target", "_blank");
-      link.setAttribute("rel", "noopener noreferrer");
-      link.classList.add("scheme-link");
+    await new Promise((resolve) => {
+      let i = 0;
+      function typeChar() {
+        if (i < textContent.length) {
+          element.textContent += textContent[i];
+          i++;
+          setTimeout(typeChar, 15);
+        } else {
+          element.innerHTML = originalHTML;
+          element.querySelectorAll("a").forEach((link) => {
+            link.setAttribute("target", "_blank");
+            link.setAttribute("rel", "noopener noreferrer");
+            link.classList.add("scheme-link");
+          });
+          resolve();
+        }
+      }
+      typeChar();
     });
 
-    // Add a small delay between elements
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
-  // Remove cursor after completion
   cursor.remove();
 }
 
@@ -214,41 +241,62 @@ async function displayFormattedResponse(containerId, content) {
     adviceContainer.style.display = "block";
   }
 
-  // Parse and prepare content
+  // Check if response is incomplete and retry
+  if (!content.includes("# Additional Tips") || content.length < 500) {
+    showToast("Getting complete response...");
+
+    try {
+      // Maximum 3 retries
+      for (let i = 0; i < 3; i++) {
+        const retryResponse = await fetch(window.lastRequestUrl, {
+          method: "POST",
+          headers: window.lastRequestHeaders,
+          body: window.lastRequestBody,
+        });
+
+        const retryData = await retryResponse.json();
+        if (retryData.error) throw new Error(retryData.error);
+
+        // Check if new response is more complete
+        if (retryData.advice && retryData.advice.length > content.length) {
+          content = retryData.advice;
+          if (content.includes("# Additional Tips")) break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s between retries
+      }
+    } catch (error) {
+      console.error("Retry failed:", error);
+    }
+  }
+
+  // Format and display content
   const formattedContent = formatAIResponse(content);
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = formattedContent;
 
   // Clear existing content
   adviceContent.innerHTML = "";
-
-  // Create and append cursor element
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   adviceContent.appendChild(cursor);
 
-  // Type each element with cursor effect
+  // Type each element
   for (const child of tempDiv.children) {
     const element = document.createElement(child.tagName);
     element.className = child.className;
     adviceContent.insertBefore(element, cursor);
 
-    // Store original HTML
-    const originalHTML = child.innerHTML;
-    const textContent = child.textContent;
-
-    // Type the text content with cursor
     await new Promise((resolve) => {
       let i = 0;
+      const textContent = child.textContent;
       function typeChar() {
         if (i < textContent.length) {
           element.textContent += textContent[i];
           i++;
           setTimeout(typeChar, 15);
         } else {
-          // Restore HTML formatting after typing
-          element.innerHTML = originalHTML;
-          // Process any links
+          element.innerHTML = child.innerHTML;
           element.querySelectorAll("a").forEach((link) => {
             link.setAttribute("target", "_blank");
             link.setAttribute("rel", "noopener noreferrer");
@@ -260,11 +308,9 @@ async function displayFormattedResponse(containerId, content) {
       typeChar();
     });
 
-    // Add delay between elements
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
-  // Remove cursor after completion
   cursor.remove();
 }
 
@@ -322,6 +368,7 @@ async function getAgricultureAdvice() {
 async function getWaterAdvice() {
   const cropType = document.getElementById("crop-type").value;
   const soilType = document.getElementById("soil-type").value;
+  const language = document.getElementById("language").value;
 
   if (!cropType || !soilType) {
     showError("Please fill in all fields");
@@ -330,13 +377,22 @@ async function getWaterAdvice() {
 
   showLoading();
 
+  // Store request details for potential retry
+  window.lastRequestUrl = "/water-management";
+  window.lastRequestHeaders = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+  window.lastRequestBody = `crop_type=${encodeURIComponent(
+    cropType
+  )}&soil_type=${encodeURIComponent(soilType)}&language=${encodeURIComponent(
+    language
+  )}`;
+
   try {
-    const response = await fetch("/water-management", {
+    const response = await fetch(window.lastRequestUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `crop_type=${encodeURIComponent(
-        cropType
-      )}&soil_type=${encodeURIComponent(soilType)}`,
+      headers: window.lastRequestHeaders,
+      body: window.lastRequestBody,
     });
 
     const data = await response.json();
@@ -411,6 +467,7 @@ async function getBioFertilizerAdvice() {
   const cropType = document.getElementById("bio-crop-type").value;
   const soilType = document.getElementById("bio-soil-type").value;
   const growthStage = document.getElementById("growth-stage").value;
+  const language = document.getElementById("language").value;
 
   if (!cropType || !soilType || !growthStage) {
     showError("Please fill in all fields");
@@ -419,15 +476,24 @@ async function getBioFertilizerAdvice() {
 
   showLoading();
 
+  // Store request details for potential retry
+  window.lastRequestUrl = "/bio-fertilizer";
+  window.lastRequestHeaders = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+  window.lastRequestBody = `crop_type=${encodeURIComponent(
+    cropType
+  )}&soil_type=${encodeURIComponent(
+    soilType
+  )}&growth_stage=${encodeURIComponent(
+    growthStage
+  )}&language=${encodeURIComponent(language)}`;
+
   try {
-    const response = await fetch("/bio-fertilizer", {
+    const response = await fetch(window.lastRequestUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `crop_type=${encodeURIComponent(
-        cropType
-      )}&soil_type=${encodeURIComponent(
-        soilType
-      )}&growth_stage=${encodeURIComponent(growthStage)}`,
+      headers: window.lastRequestHeaders,
+      body: window.lastRequestBody,
     });
 
     const data = await response.json();
@@ -567,6 +633,23 @@ function showToast(message) {
 // Make weather functions globally available
 window.getWeatherData = getWeatherData;
 
+// Error handling functions
+function showError(message) {
+  showToast(message);
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast-message";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Make error handling functions globally available
+window.showError = showError;
+window.showToast = showToast;
+
 // Utility functions
 function showLoading() {
   const loadingOverlay = document.querySelector(".loading-overlay");
@@ -616,3 +699,35 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Add voice input handler that respects selected language
+function startVoiceInput(inputId) {
+  if ("webkitSpeechRecognition" in window) {
+    const recognition = new webkitSpeechRecognition();
+    const language = document.getElementById("language").value;
+
+    // Map language codes to recognition codes
+    const langMap = {
+      en: "en-US",
+      hi: "hi-IN",
+      te: "te-IN",
+      ta: "ta-IN",
+    };
+
+    recognition.lang = langMap[language] || "en-US";
+    recognition.onresult = function (event) {
+      document.getElementById(inputId).value = event.results[0][0].transcript;
+    };
+    recognition.start();
+  } else {
+    alert("Voice input is not supported in your browser");
+  }
+}
+
+// Make functions globally available
+window.getWaterAdvice = getWaterAdvice;
+window.getBioFertilizerAdvice = getBioFertilizerAdvice;
+window.getAgricultureAdvice = getAgricultureAdvice;
+window.startVoiceInput = startVoiceInput;
+window.showError = showError;
+window.showToast = showToast;

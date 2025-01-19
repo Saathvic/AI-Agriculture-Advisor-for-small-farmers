@@ -77,31 +77,70 @@ def analyze_image_with_llama(image):
         print(f"Error in analyze_image_with_llama: {str(e)}")
         raise Exception(f"Error analyzing image: {str(e)}")
 
-def get_water_advice(crop_type, soil_type):
-    prompt = f"""Provide specific water management advice for {crop_type} crop grown in {soil_type} soil.
+def get_water_advice(crop_type, soil_type, language='en'):
+    lang_prompts = {
+        'en': 'in English',
+        'hi': 'in Hindi language with English terms for technical words',
+        'te': 'in Telugu language with English terms for technical words',
+        'ta': 'in Tamil language with English terms for technical words'
+    }
+    lang_text = lang_prompts.get(language, 'in English')
+
+    prompt = f"""Please provide comprehensive water management advice {lang_text} for {crop_type} crop grown in {soil_type} soil.
+    Keep technical terms in English but translate all explanations.
+    Ensure the response is complete and detailed.
     Structure your response in this exact format:
 
     # Water Management Plan
-    [Brief overview of water requirements for {crop_type} in {soil_type} soil]
+    [Detailed overview of water requirements for {crop_type} in {soil_type} soil]
 
     # Detailed Recommendations
     1. **Watering Schedule**
-    [Details about frequency and timing specific to {crop_type}]
+    [Complete details about frequency and timing]
 
     2. **Water Amount**
-    [Specific quantities and measurements for {soil_type} soil]
+    [Specific measurements and quantities]
+
+    3. **Irrigation Methods**
+    [Best methods for this crop]
 
     # Best Practices
-    [Rest of the format...]"""
+    1. **Water Conservation**
+    [Detailed conservation techniques]
+
+    2. **Monitoring**
+    [How to check soil moisture]
+
+    # Additional Tips
+    - [Important seasonal adjustments]
+    - [Special considerations]
+    """
 
     try:
+        # Increase temperature slightly and max_tokens significantly
         completion = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Updated model
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=500
+            temperature=0.8,  # Slightly higher temperature
+            max_tokens=2500,  # Much higher token limit
+            top_p=0.9,       # Add top_p parameter
+            presence_penalty=0.1,  # Add presence penalty
+            frequency_penalty=0.1   # Add frequency penalty
         )
-        return completion.choices[0].message.content
+        response = completion.choices[0].message.content
+        
+        # Verify response completeness
+        if not response.strip().endswith("]") and not "# Additional Tips" in response:
+            # Try one more time if response seems incomplete
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=3000  # Even higher for retry
+            )
+            response = completion.choices[0].message.content
+            
+        return response
     except Exception as e:
         return f"Error getting water advice: {str(e)}"
 
@@ -289,46 +328,76 @@ def analyze_crop_image(image):
         "sustainable_advice": sustainable_advice
     }
 
-def get_bio_fertilizer_advice(crop_type, soil_type, growth_stage):
-    prompt = f"""Provide specific bio-fertilizer recommendations for {crop_type} crop in {soil_type} soil during {growth_stage} stage.
+def get_bio_fertilizer_advice(crop_type, soil_type, growth_stage, language='en'):
+    lang_prompts = {
+        'en': 'in English',
+        'hi': 'in Hindi language with English terms for technical words',
+        'te': 'in Telugu language with English terms for technical words',
+        'ta': 'in Tamil language with English terms for technical words'
+    }
+    lang_text = lang_prompts.get(language, 'in English')
+
+    prompt = f"""Please provide detailed bio-fertilizer recommendations {lang_text} for {crop_type} crop in {soil_type} soil during {growth_stage} stage.
+    Keep technical terms in English but translate all explanations.
+    Ensure the response is complete and detailed.
     Structure your response in this exact format:
 
     # Bio-Fertilizer Overview
-    [Brief introduction about organic fertilization for {crop_type}]
+    [Comprehensive introduction about organic fertilization]
 
     # Primary Recommendations
     1. **Recommended Bio-Fertilizers**
-    [List and describe main bio-fertilizers suitable for {crop_type}]
+    [Detailed list with descriptions]
 
     2. **Application Method**
-    [Detailed application instructions for {soil_type} soil]
+    [Step-by-step instructions]
+
+    3. **Dosage Guidelines**
+    [Specific quantities and measurements]
 
     # Timing and Frequency
     1. **Application Schedule**
-    [When to apply during {growth_stage} stage]
+    [Detailed timeline]
 
     2. **Frequency Guidelines**
-    [How often to apply]
+    [Complete application frequency]
 
     # Best Practices
     1. **Storage Guidelines**
-    [How to store bio-fertilizers]
+    [Detailed storage instructions]
 
     2. **Safety Precautions**
-    [Safety measures during application]
+    [Complete safety measures]
 
     # Additional Tips
-    - **Soil Preparation**: [Preparation guidelines]
-    - **Compatibility**: [What to avoid mixing]"""
+    - [Soil preparation details]
+    - [Compatibility information]
+    """
 
     try:
+        # Similar improvements as water_advice
         completion = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=800  # Increased token limit for more detailed response
+            temperature=0.8,
+            max_tokens=2500,
+            top_p=0.9,
+            presence_penalty=0.1,
+            frequency_penalty=0.1
         )
-        return completion.choices[0].message.content
+        response = completion.choices[0].message.content
+        
+        # Verify response completeness
+        if not response.strip().endswith("]") and not "# Additional Tips" in response:
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=3000
+            )
+            response = completion.choices[0].message.content
+            
+        return response
     except Exception as e:
         return f"Error getting bio-fertilizer advice: {str(e)}"
 
@@ -482,11 +551,12 @@ def get_advice():
 def water_management():
     crop_type = request.form.get('crop_type')
     soil_type = request.form.get('soil_type')
+    language = request.form.get('language', 'en')
     
-    if not crop_type or soil_type:
+    if not crop_type or not soil_type:  # Fixed condition
         return jsonify({'error': 'Please provide both crop type and soil type'}), 400
     
-    advice = get_water_advice(crop_type, soil_type)
+    advice = get_water_advice(crop_type, soil_type, language)
     return jsonify({'advice': advice})
 
 @app.route('/analyze-image', methods=['POST'])
@@ -531,11 +601,12 @@ def bio_fertilizer():
     crop_type = request.form.get('crop_type')
     soil_type = request.form.get('soil_type')
     growth_stage = request.form.get('growth_stage')
+    language = request.form.get('language', 'en')
     
     if not all([crop_type, soil_type, growth_stage]):
         return jsonify({'error': 'Please provide all required fields'}), 400
     
-    advice = get_bio_fertilizer_advice(crop_type, soil_type, growth_stage)
+    advice = get_bio_fertilizer_advice(crop_type, soil_type, growth_stage, language)
     return jsonify({'advice': advice})
 
 @app.route('/weather', methods=['POST'])
