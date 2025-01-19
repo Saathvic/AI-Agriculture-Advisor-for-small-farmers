@@ -724,6 +724,57 @@ function startVoiceInput(inputId) {
   }
 }
 
+// Add copy and share functionality
+function copyResponse() {
+  const adviceContent = document.querySelector(".advice-content");
+  if (!adviceContent) return;
+
+  // Create a temporary textarea to copy the text
+  const textarea = document.createElement("textarea");
+  textarea.value = adviceContent.innerText;
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    document.execCommand("copy");
+    showToast("Content copied to clipboard!");
+  } catch (err) {
+    showToast("Failed to copy content");
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+async function shareResponse() {
+  const adviceContent = document.querySelector(".advice-content");
+  if (!adviceContent) return;
+
+  const shareData = {
+    title: "Smart Farming Advice",
+    text: adviceContent.innerText,
+    url: window.location.href,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      showToast("Shared successfully!");
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      const shareUrl = `https://wa.me/?text=${encodeURIComponent(
+        shareData.text
+      )}`;
+      window.open(shareUrl, "_blank");
+    }
+  } catch (err) {
+    showToast("Failed to share content");
+  }
+}
+
+// Make copy and share functions globally available
+window.copyResponse = copyResponse;
+window.shareResponse = shareResponse;
+
 // Make functions globally available
 window.getWaterAdvice = getWaterAdvice;
 window.getBioFertilizerAdvice = getBioFertilizerAdvice;
