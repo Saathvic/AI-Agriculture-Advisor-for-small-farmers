@@ -387,28 +387,28 @@ def get_scheme_information(state, category):
         raise Exception(f"Error getting scheme information: {str(e)}")
 
 def get_crop_recommendations(weather_summary):
-    prompt = f"""Based on the following weather forecast, provide detailed crop recommendations:
+    prompt = f"""Based on the following weather forecast and soil information, provide detailed crop recommendations:
 
 {weather_summary}
 
 Structure your response in this exact format:
 
-# Crop Recommendations Based on Weather Forecast
+# Crop Recommendations Based on Weather and Soil Conditions
 
 1. **Suitable Crops**
-[List 3-4 crops that would thrive in these conditions]
+[List 3-4 crops that would thrive in these weather and soil conditions]
 
 2. **Planting Advice**
-[Specific planting recommendations considering the weather]
+[Specific planting recommendations considering both weather and soil type]
 
-3. **Precautionary Measures**
-[Weather-specific precautions farmers should take]
+3. **Soil Management**
+[Specific soil preparation and maintenance advice]
 
 4. **Irrigation Guidelines**
-[Water management advice based on forecast]
+[Water management advice based on weather and soil type]
 
 5. **Additional Recommendations**
-[Any other relevant advice based on the weather conditions]"""
+[Any other relevant advice based on the conditions]"""
 
     try:
         completion = groq_client.chat.completions.create(
@@ -557,8 +557,10 @@ def get_weather():
 @app.route('/get-crop-recommendations', methods=['POST'])
 def get_crop_recommendations_route():
     city = request.form.get('city')
-    if not city:
-        return jsonify({'error': 'Please provide a city name'}), 400
+    soil_type = request.form.get('soil_type')
+    
+    if not city or not soil_type:
+        return jsonify({'error': 'Please provide both city name and soil type'}), 400
 
     try:
         # Get weather forecast
@@ -566,7 +568,10 @@ def get_crop_recommendations_route():
         if 'error' in forecast_data:
             return jsonify({'error': forecast_data['error']}), 500
 
-        # Get crop recommendations based on weather
+        # Add soil type to forecast data
+        forecast_data['weather_summary'] += f"\nSoil Type: {soil_type}"
+
+        # Get crop recommendations based on weather and soil
         recommendations = get_crop_recommendations(forecast_data['weather_summary'])
         
         return jsonify({

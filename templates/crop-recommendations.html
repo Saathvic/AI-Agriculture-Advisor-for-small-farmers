@@ -62,19 +62,38 @@
 
     <div class="container-fluid py-4">
       <div class="row">
-        <div class="col-lg-12">
-          <div class="text-center mb-4 animate__animated animate__fadeIn">
-            <h1 class="page-title">Weather-Based Crop Recommendations</h1>
-            <p class="page-subtitle">
-              Get intelligent crop suggestions based on weather forecast
-            </p>
-          </div>
-
+        <!-- Left Panel - Input Form -->
+        <div class="col-lg-4">
           <div
-            class="form-container glass-morphism animate__animated animate__fadeInUp"
+            class="form-container glass-morphism animate__animated animate__fadeInUp sticky-top"
+            style="top: 2rem"
           >
+            <h4 class="text-center mb-4">Input Parameters</h4>
             <div class="input-section mb-4">
-              <div class="input-group">
+              <!-- Language and Voice Input Controls -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <button
+                  class="btn btn-outline-success btn-sm"
+                  onclick="startVoiceInput()"
+                >
+                  <i class="bi bi-mic"></i> Voice Input
+                </button>
+                <select
+                  id="language"
+                  class="form-select form-select-sm"
+                  style="width: auto"
+                >
+                  <option value="en">English</option>
+                  <option value="hi">हिंदी</option>
+                  <option value="te">తెలుగు</option>
+                  <option value="ta">தமிழ்</option>
+                </select>
+              </div>
+
+              <!-- Location Input -->
+              <div class="input-group mb-3">
                 <span class="input-group-text"
                   ><i class="bi bi-geo-alt"></i
                 ></span>
@@ -84,48 +103,89 @@
                   class="form-control"
                   placeholder="Enter city name"
                 />
-                <button class="btn btn-success" onclick="getWeatherAndCrops()">
-                  <i class="bi bi-search me-2"></i>Get Recommendations
-                </button>
               </div>
+
+              <!-- Soil Type Selection -->
+              <div class="input-group mb-3">
+                <span class="input-group-text"
+                  ><i class="bi bi-layers"></i
+                ></span>
+                <select id="soil-type" class="form-control">
+                  <option value="">Select Soil Type</option>
+                  <option value="Sandy">Sandy Soil</option>
+                  <option value="Clay">Clay Soil</option>
+                  <option value="Loamy">Loamy Soil</option>
+                  <option value="Silt">Silt Soil</option>
+                  <option value="Peat">Peat Soil</option>
+                  <option value="Chalk">Chalk Soil</option>
+                  <option value="Black">Black Soil</option>
+                  <option value="Red">Red Soil</option>
+                </select>
+              </div>
+
+              <!-- Submit Button -->
+              <button
+                class="btn btn-success w-100"
+                onclick="getWeatherAndCrops()"
+              >
+                <i class="bi bi-search me-2"></i>Get Recommendations
+              </button>
             </div>
 
-            <!-- Results Area -->
-            <div id="recommendations-result" class="result-container mt-4">
-              <div class="loading-overlay" style="display: none">
-                <div class="spinner-border text-success mb-3" role="status">
-                  <span class="visually-hidden">Loading...</span>
+            <!-- Quick Reference -->
+            <div class="quick-guide mt-4">
+              <h5 class="mb-3">Soil Type Guide</h5>
+              <div class="soil-guide-list">
+                <div class="soil-type-item mb-2">
+                  <i class="bi bi-circle-fill text-warning"></i>
+                  <small>Sandy - Light, well-draining</small>
                 </div>
-                <p class="text-success">Analyzing weather patterns...</p>
+                <div class="soil-type-item mb-2">
+                  <i class="bi bi-circle-fill text-danger"></i>
+                  <small>Clay - Heavy, water-retentive</small>
+                </div>
+                <!-- Add more soil type descriptions -->
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div class="weather-summary mb-4" style="display: none">
-                <!-- Weather summary will be inserted here -->
+        <!-- Right Panel - Results -->
+        <div class="col-lg-8">
+          <div id="recommendations-result" class="result-container mt-4">
+            <div class="loading-overlay" style="display: none">
+              <div class="spinner-border text-success mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
               </div>
+              <p class="text-success">Analyzing conditions...</p>
+            </div>
 
-              <div class="advice" style="display: none">
-                <div class="response-header">
-                  <h3 class="response-title">Crop Recommendations</h3>
-                  <div class="response-actions">
-                    <button
-                      class="action-btn"
-                      onclick="copyResponse()"
-                      title="Copy"
-                    >
-                      <i class="bi bi-clipboard"></i>
-                    </button>
-                    <button
-                      class="action-btn"
-                      onclick="shareResponse()"
-                      title="Share"
-                    >
-                      <i class="bi bi-share"></i>
-                    </button>
-                  </div>
+            <div class="weather-summary mb-4" style="display: none">
+              <!-- Weather summary will be inserted here -->
+            </div>
+
+            <div class="advice" style="display: none">
+              <div class="response-header">
+                <h3 class="response-title">Crop Recommendations</h3>
+                <div class="response-actions">
+                  <button
+                    class="action-btn"
+                    onclick="copyResponse()"
+                    title="Copy"
+                  >
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                  <button
+                    class="action-btn"
+                    onclick="shareResponse()"
+                    title="Share"
+                  >
+                    <i class="bi bi-share"></i>
+                  </button>
                 </div>
-                <div class="advice-content">
-                  <!-- Content will be inserted here -->
-                </div>
+              </div>
+              <div class="advice-content">
+                <!-- Content will be inserted here -->
               </div>
             </div>
           </div>
@@ -140,8 +200,10 @@
     <script>
       async function getWeatherAndCrops() {
         const city = document.getElementById("city-input").value;
-        if (!city) {
-          showToast("Please enter a city name");
+        const soilType = document.getElementById("soil-type").value;
+
+        if (!city || !soilType) {
+          showToast("Please enter both city name and soil type");
           return;
         }
 
@@ -153,7 +215,9 @@
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: `city=${encodeURIComponent(city)}`,
+            body: `city=${encodeURIComponent(
+              city
+            )}&soil_type=${encodeURIComponent(soilType)}`,
           });
 
           const data = await response.json();
@@ -165,7 +229,7 @@
           weatherSummary.innerHTML = `
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Weather Forecast Summary</h5>
+                            <h5 class="card-title">Weather & Soil Analysis</h5>
                             <pre class="weather-text">${data.weather_summary}</pre>
                         </div>
                     </div>
@@ -182,6 +246,47 @@
           hideLoading();
         }
       }
+
+      function startVoiceInput() {
+        if ("webkitSpeechRecognition" in window) {
+          const recognition = new webkitSpeechRecognition();
+          recognition.lang = document.getElementById("language").value;
+          recognition.onresult = function (event) {
+            document.getElementById("city-input").value =
+              event.results[0][0].transcript;
+          };
+          recognition.start();
+        } else {
+          alert("Voice input is not supported in your browser");
+        }
+      }
+
+      document
+        .getElementById("language")
+        .addEventListener("change", function () {
+          console.log("Language changed to:", this.value);
+        });
     </script>
+    <style>
+      .soil-type-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .soil-type-item i {
+        font-size: 0.8rem;
+      }
+
+      .sticky-top {
+        z-index: 100;
+      }
+
+      @media (max-width: 991.98px) {
+        .sticky-top {
+          position: static !important;
+        }
+      }
+    </style>
   </body>
 </html>
