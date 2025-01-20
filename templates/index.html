@@ -35,7 +35,7 @@
             <li class="nav-item"><a class="nav-link" href="/disease"><i class="bi bi-bug"></i> Disease</a></li>
             <li class="nav-item"><a class="nav-link" href="/bio-fertilizer"><i class="bi bi-flower1"></i> Bio Fertilizer</a></li>
             <li class="nav-item"><a class="nav-link" href="/schemes"><i class="bi bi-cash-coin"></i> Schemes</a></li>
-            <li class="nav-item"><a class="nav-link" href="/crop-recommendations"><i class="bi bi-list-check"></i> Crops</a></li>
+          
           </ul>
         </div>
       </div>
@@ -72,7 +72,7 @@
             <div class="col-md-3">
               <div class="stat-card text-center">
                 <div class="stat-content">
-                  <h3 class="stat-number">6</h3>
+                  <h3 class="stat-number">8</h3>
                   <p class="stat-label">Smart Services</p>
                 </div>
               </div>
@@ -224,11 +224,20 @@
           navbar.classList.remove('scrolled');
         }
       });
+
+      // Smooth scroll to footer when Contact Us is clicked
+      document.querySelector('a[href="#contact"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector('#contact').scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
     </script>
 
     <!-- Footer Section -->
      
-    <footer class="footer mt-auto py-3">
+    <footer class="footer mt-auto py-3" id="contact">
       <div class="container">
         <div class="row">
           <div class="col-md-4">
