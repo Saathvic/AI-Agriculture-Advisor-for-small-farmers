@@ -19,9 +19,18 @@
     />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <nav class="navbar navbar-expand-lg navbar-dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">Smart Farming</a>
+        <a class="navbar-brand" href="/">
+          <div class="logo-container">
+            <img
+              src="/static/images/logo.png"
+              alt="Smart Farming"
+              class="logo"
+            />
+            <span>Smart Farming</span>
+          </div>
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -31,27 +40,44 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
+              <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/agriculture">Agriculture Advice</a>
+              <a class="nav-link" href="/agriculture"
+                ><i class="bi bi-tree"></i> Agriculture</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/water">Water Management</a>
+              <a class="nav-link" href="/water"
+                ><i class="bi bi-droplet"></i> Water</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/image">Image Analysis</a>
+              <a class="nav-link" href="/image"
+                ><i class="bi bi-image"></i> Analysis</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/disease">Disease Detection</a>
+              <a class="nav-link" href="/disease"
+                ><i class="bi bi-bug"></i> Disease</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/bio-fertilizer">Bio Fertilizer</a>
+              <a class="nav-link" href="/bio-fertilizer"
+                ><i class="bi bi-flower1"></i> Bio Fertilizer</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/schemes">Schemes & Loans</a>
+              <a class="nav-link" href="/schemes"
+                ><i class="bi bi-cash-coin"></i> Schemes</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/crop-recommendations"
+                ><i class="bi bi-list-check"></i> Crops</a
+              >
             </li>
           </ul>
         </div>
@@ -295,6 +321,15 @@
         document.getElementById("crop-image").value = "";
         document.getElementById("image-preview").style.display = "none";
       }
+
+      window.addEventListener("scroll", function () {
+        const navbar = document.querySelector(".navbar");
+        if (window.scrollY > 50) {
+          navbar.classList.add("scrolled");
+        } else {
+          navbar.classList.remove("scrolled");
+        }
+      });
     </script>
   </body>
 </html>
