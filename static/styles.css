@@ -1555,3 +1555,24 @@ input[type="file"] {
 }
 
 /* ...existing code... */
+
+/* ...existing code... */
+
+.quick-access-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.features-list small {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.features-list i {
+  margin-right: 0.5rem;
+}
+
+/* ...existing code... */

@@ -184,6 +184,52 @@
           </div>
         </div>
       </section>
+
+      <!-- New Quick Access Section -->
+      <section class="quick-access-section py-5">
+        <div class="container">
+          <h2 class="text-center mb-5">Essential Farming Tools</h2>
+          <div class="row justify-content-center g-4">
+            <!-- Crop Recommendations Card -->
+            <div class="col-md-6">
+              <div class="service-card h-100">
+                <div class="card-content">
+                  <i class="bi bi-list-check fs-1 text-success mb-3"></i>
+                  <h3>Crop Recommendations</h3>
+                  <p>Get personalized crop suggestions based on weather and soil conditions</p>
+                  <div class="features-list mb-4">
+                    <small class="d-block mb-2"><i class="bi bi-check2-circle text-success"></i> Weather-based analysis</small>
+                    <small class="d-block mb-2"><i class="bi bi-check2-circle text-success"></i> Soil-specific advice</small>
+                    <small class="d-block"><i class="bi bi-check2-circle text-success"></i> Seasonal recommendations</small>
+                  </div>
+                  <a href="{{ url_for('crop_recommendations_page') }}" class="btn btn-custom-green">
+                    Get Recommendations <i class="bi bi-arrow-right ms-2"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Crop Rotation Card -->
+            <div class="col-md-6">
+              <div class="service-card h-100">
+                <div class="card-content">
+                  <i class="bi bi-arrow-repeat fs-1 text-success mb-3"></i>
+                  <h3>Crop Rotation Guide</h3>
+                  <p>Learn about optimal crop rotation patterns for sustainable farming</p>
+                  <div class="features-list mb-4">
+                    <small class="d-block mb-2"><i class="bi bi-check2-circle text-success"></i> Rotation schedules</small>
+                    <small class="d-block mb-2"><i class="bi bi-check2-circle text-success"></i> Soil health benefits</small>
+                    <small class="d-block"><i class="bi bi-check2-circle text-success"></i> Pest management</small>
+                  </div>
+                  <a href="{{ url_for('crop_rotation_page') }}" class="btn btn-custom-green">
+                    View Guide <i class="bi bi-arrow-right ms-2"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -782,3 +782,50 @@ window.getAgricultureAdvice = getAgricultureAdvice;
 window.startVoiceInput = startVoiceInput;
 window.showError = showError;
 window.showToast = showToast;
+
+// Add the function to handle crop rotation requests
+async function getCropRotationAdvice() {
+  const question = document.getElementById("rotation-question").value;
+  const language = document.getElementById("language").value;
+
+  if (!question) {
+    showError("Please enter your question");
+    return;
+  }
+
+  showLoading();
+
+  // Store request details for potential retry
+  window.lastRequestUrl = "/get-rotation-advice";
+  window.lastRequestHeaders = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+  window.lastRequestBody = `question=${encodeURIComponent(
+    question
+  )}&language=${encodeURIComponent(language)}`;
+
+  try {
+    const response = await fetch(window.lastRequestUrl, {
+      method: "POST",
+      headers: window.lastRequestHeaders,
+      body: window.lastRequestBody,
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    // Add to search history - Make sure this function is called
+    if (window.addToHistory) {
+      window.addToHistory(question);
+    }
+
+    await displayFormattedResponse("rotation-result", data.advice);
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// Make the function globally available
+window.getCropRotationAdvice = getCropRotationAdvice;

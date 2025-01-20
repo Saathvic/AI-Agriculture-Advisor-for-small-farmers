@@ -490,6 +490,96 @@ Structure your response in this exact format:
     except Exception as e:
         return f"Error getting crop recommendations: {str(e)}"
 
+def get_crop_rotation_advice(question, language='en'):
+    lang_prompts = {
+        'en': 'in English',
+        'hi': 'in Hindi language with English terms for technical words',
+        'te': 'in Telugu language with English terms for technical words',
+        'ta': 'in Tamil language with English terms for technical words'
+    }
+    lang_text = lang_prompts.get(language, 'in English')
+    
+    prompt = f"""As an agricultural expert, provide detailed crop rotation advice {lang_text} for: {question}
+    Keep technical terms in English but translate all explanations.
+    Structure your response in this exact format:
+
+    # Rotation Overview
+    [Brief introduction about the requested rotation pattern]
+
+    # Recommended Sequence
+    1. **First Crop**
+    [Details and timing]
+
+    2. **Second Crop**
+    [Details and timing]
+
+    3. **Third Crop**
+    [Details and timing]
+
+    # Soil Benefits
+    1. **Nutrient Management**
+    [How this rotation helps soil]
+
+    2. **Structure Improvement**
+    [Soil structure benefits]
+
+    # Pest Management
+    1. **Disease Control**
+    [How rotation reduces diseases]
+
+    2. **Pest Prevention**
+    [Natural pest control benefits]
+
+    # Implementation Tips
+    - [Practical implementation advice]
+    - [Timing considerations]
+    - [Special precautions]
+
+    # Additional Tips
+    - [Region-specific considerations]
+    - [Market considerations]
+    """
+
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.8,
+            max_tokens=2500,
+            top_p=0.9,
+            presence_penalty=0.1,
+            frequency_penalty=0.1
+        )
+        response = completion.choices[0].message.content
+        
+        # Verify and retry if incomplete
+        if not "# Additional Tips" in response:
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=3000
+            )
+            response = completion.choices[0].message.content
+            
+        return response
+    except Exception as e:
+        return f"Error getting crop rotation advice: {str(e)}"
+
+@app.route('/get-rotation-advice', methods=['POST'])
+def get_rotation_advice():
+    question = request.form.get('question')
+    language = request.form.get('language', 'en')
+    
+    if not question:
+        return jsonify({'error': 'Please provide a question'}), 400
+        
+    try:
+        advice = get_crop_rotation_advice(question, language)
+        return jsonify({'advice': advice})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/schemes', methods=['POST'])
 def schemes():
     try:
@@ -537,6 +627,10 @@ def schemes_page():
 @app.route('/crop-recommendations')
 def crop_recommendations_page():
     return render_template('crop-recommendations.html')
+
+@app.route('/crop-rotation')
+def crop_rotation_page():
+    return render_template('crop-rotation.html')
 
 @app.route('/get-advice', methods=['POST'])
 def get_advice():
